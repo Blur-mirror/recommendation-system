@@ -9,9 +9,6 @@ A collaborative recommendation system that fetches and stores movie and book dat
 - [Initial Setup](#initial-setup)
 - [Running the Application](#running-the-application)
 - [Testing the Database](#testing-the-database)
-- [Git Workflow Guide](#git-workflow-guide)
-- [Common Commands](#common-commands)
-- [Troubleshooting](#troubleshooting)
 
 ---
 
