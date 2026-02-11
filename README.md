@@ -78,14 +78,13 @@ Create a file called `.env` in the root directory with your database credentials
 ```bash
 # Database Configuration
 DB_HOST=localhost
-DB_PORT=5432
 DB_NAME=recommender
 DB_USER=postgres
-DB_PASSWORD=yourpassword
+DB_PASS=pass
 
 # API Keys (get your own from the respective websites)
 TMDB_API_KEY=your_tmdb_api_key_here
-GOOGLE_BOOKS_API_KEY=your_google_books_api_key_here
+GOOGLE_BOOKS_KEY=your_google_books_api_key_here
 ```
 
 **How to get API keys:**
