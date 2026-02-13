@@ -35,6 +35,18 @@ services:
     volumes:
       - ./backend:/app #this account for any changes in the code so they are updated in docker
 
+  frontend: #added frontend support
+    image: nginx:alpine
+    container_name: recommender_frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    networks:
+      - recommender-network
+    depends_on:
+      - backend
+
 networks:
   recommender-network: #same as above, a communicator between the services.
     driver: bridge
