@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie & Book Recommender</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #124846 0%, #040246 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        color: rgb(255, 255, 255);
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .tagline {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .tabs {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .tab-btn {
+        background: rgb(255, 255, 255);
+        border: none;
+        padding: 15px 40px;
+        font-size: 1.1rem;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .tab-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .tab-btn.active {
+        background: #1eafab;
+        color: white;
+      }
+
+      .search-box {
+        background: rgb(240, 239, 239);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 15px;
+        font-size: 1rem;
+        border: 2px solid #e3e3e3;
+        border-radius: 10px;
+        outline: none;
+        transition: border 0.3s;
+      }
+
+      .search-input:focus {
+        border-color: #1eafab;
+      }
+
+      .filters {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+      }
+
+      .filter-group {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .filter-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .filter-group select,
+      .filter-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .card h3 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+        min-height: 60px;
+      }
+
+      .card-info {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 5px 0;
+      }
+
+      .rating {
+        display: inline-block;
+        background: #ffd700;
+        color: #333;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      .rating.high {
+        background: #4caf50;
+        color: white;
+      }
+
+      .rating.medium {
+        background: #e58a02;
+        color: white;
+      }
+
+      .rating.low {
+        background: #f44336;
+        color: white;
+      }
+
+      .loading {
+        text-align: center;
+        color: white;
+        font-size: 1.5rem;
+        padding: 40px;
+      }
+
+      .error {
+        background: #f44336;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .stats {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .stats span {
+        font-weight: bold;
+        color: #764ba2;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1> Movie & Book Recommender </h1>
+        <p class="tagline">Discover your next favorite movie or book</p>
+      </header>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('movies')">
+          Movies
+        </button>
+        <button class="tab-btn" onclick="switchTab('books')">Books</button>
+      </div>
+
+      <div class="search-box">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search for movies or books..."
+          onkeyup="handleSearch()"
+        />
+
+        <div class="filters" id="filters">
+          <!-- Filters will be injected here -->
+        </div>
+      </div>
+
+      <div class="stats" id="stats">Loading...</div>
+
+      <div class="grid" id="content">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <script>
+      let currentTab = "movies";
+      let allData = [];
+
+      // API Base URL
+      const API_URL = "http://localhost:5000/api";
+
+      // Initialize on page load
+      window.onload = () => {
+        loadData("movies");
+      };
+
+      // Switch between Movies and Books
+      function switchTab(tab) {
+        currentTab = tab;
+
+        // Update tab buttons
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        event.target.classList.add("active");
+
+        // Clear search
+        document.getElementById("searchInput").value = "";
+
+        // Load data
+        loadData(tab);
+      }
+
+      // Load data from API
+      async function loadData(type) {
+        const contentDiv = document.getElementById("content");
+        const statsDiv = document.getElementById("stats");
+
+        try {
+          contentDiv.innerHTML = '<div class="loading">Loading...</div>';
+
+          const response = await fetch(`${API_URL}/${type}/`);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          allData = data[type] || [];
+
+          // Update stats
+          statsDiv.innerHTML = `Found <span>${allData.length}</span> ${type}`;
+
+          // Render filters
+          renderFilters(type);
+
+          // Render content
+          renderContent(allData, type);
+        } catch (error) {
+          console.error("Error loading data:", error);
+          contentDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error loading ${type}. Make sure the API is running!<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+        }
+      }
+
+      // Render filters based on content type
+      function renderFilters(type) {
+        const filtersDiv = document.getElementById("filters");
+
+        if (type === "movies") {
+          filtersDiv.innerHTML = `
+                    <div class="filter-group">
+                        <label>Minimum Rating</label>
+                        <select id="minRating" onchange="applyFilters()">
+                            <option value="0">All Ratings</option>
+                            <option value="5">5.0+</option>
+                            <option value="6">6.0+</option>
+                            <option value="7">7.0+</option>
+                            <option value="8">8.0+</option>
+                            <option value="9">9.0+</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Release Year</label>
+                        <select id="yearFilter" onchange="applyFilters()">
+                            <option value="">All Years</option>
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                        </select>
+                    </div>
+                `;
+        } else {
+          filtersDiv.innerHTML = `
+                    <div class="filter-group">
+                        <label>Minimum Rating</label>
+                        <select id="minRating" onchange="applyFilters()">
+                            <option value="0">All Ratings</option>
+                            <option value="3">3.0+</option>
+                            <option value="4">4.0+</option>
+                            <option value="4.5">4.5+</option>
+                        </select>
+                    </div>
+                `;
+        }
+      }
+
+      // Apply filters
+      function applyFilters() {
+        const minRating = parseFloat(
+          document.getElementById("minRating")?.value || 0,
+        );
+        const yearFilter = document.getElementById("yearFilter")?.value;
+
+        let filtered = allData.filter((item) => {
+          if (item.rating < minRating) return false;
+          if (
+            yearFilter &&
+            currentTab === "movies" &&
+            item.release_year != yearFilter
+          )
+            return false;
+          return true;
+        });
+
+        renderContent(filtered, currentTab);
+      }
+
+      // Search handler
+      function handleSearch() {
+        const query = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+
+        if (query.length === 0) {
+          applyFilters();
+          return;
+        }
+
+        const filtered = allData.filter((item) => {
+          if (currentTab === "movies") {
+            return item.title.toLowerCase().includes(query);
+          } else {
+            return (
+              item.title.toLowerCase().includes(query) ||
+              item.authors.toLowerCase().includes(query)
+            );
+          }
+        });
+
+        renderContent(filtered, currentTab);
+      }
+
+      // Render content cards
+      function renderContent(data, type) {
+        const contentDiv = document.getElementById("content");
+
+        if (data.length === 0) {
+          contentDiv.innerHTML = '<div class="loading">No results found</div>';
+          return;
+        }
+
+        const html = data
+          .map((item) => {
+            if (type === "movies") {
+              return createMovieCard(item);
+            } else {
+              return createBookCard(item);
+            }
+          })
+          .join("");
+
+        contentDiv.innerHTML = html;
+      }
+
+      // Create movie card
+      function createMovieCard(movie) {
+        const ratingClass =
+          movie.rating >= 8 ? "high" : movie.rating >= 6 ? "medium" : "low";
+
+        return `
+                <div class="card">
+                    <h3>${movie.title}</h3>
+                    <p class="card-info">📅 ${movie.release_year || "N/A"}</p>
+                    <span class="rating ${ratingClass}">⭐ ${movie.rating.toFixed(1)}</span>
+                </div>
+            `;
+      }
+
+      // Create book card
+      function createBookCard(book) {
+        const ratingClass =
+          book.rating >= 4 ? "high" : book.rating >= 3 ? "medium" : "low";
+        const ratingDisplay =
+          book.rating > 0 ? book.rating.toFixed(1) : "No rating";
+
+        return `
+                <div class="card">
+                    <h3>${book.title}</h3>
+                    <p class="card-info">✍️ ${book.authors}</p>
+                    ${book.rating > 0 ? `<span class="rating ${ratingClass}">⭐ ${ratingDisplay}</span>` : '<span class="rating low">No rating</span>'}
+                </div>
+            `;
+      }
+    </script>
+  </body>
+</html>
