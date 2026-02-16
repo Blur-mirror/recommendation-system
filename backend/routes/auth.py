@@ -14,66 +14,66 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "fallback-secret-key")
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-"""Takes user info, hashes the password, and saves it to Postgres."""
-   try:
-        data = request.get_json()
+    """Register a new user"""
+    try:
+            data = request.get_json()
 
-       # Validation: Make sure the user didn't leave anything blank
-        if not data or not data.get('username') or not data.get('email') or not data.get('password'):
-            return jsonify({"error": "Username, email, and password are required"}), 400
+            # Validation: Make sure the user didn't leave anything blank
+            if not data or not data.get('username') or not data.get('email') or not data.get('password'):
+                return jsonify({"error": "Username, email, and password are required"}), 400
 
-        username = data['username']
-        email = data['email']
-        password = data['password']
+            username = data['username']
+            email = data['email']
+            password = data['password']
 
-        # Validate password length
-        if len(password) < 6:
-            return jsonify({"error": "Password must be at least 6 characters"}), 400
+            # Validate password length
+            if len(password) < 6:
+                return jsonify({"error": "Password must be at least 6 characters"}), 400
 
-        # Hashing: Scramble the password so it's unreadable in the DB
-        password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+            # Hashing: Scramble the password so it's unreadable in the DB
+            password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
-        conn = get_connection()
-        cur = conn.cursor()
+            conn = get_connection()
+            cur = conn.cursor()
 
-        # Conflict Check: Don't allow two people with the same email/username
-        cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
-        existing_user = cur.fetchone()
+            # Conflict Check: Don't allow two people with the same email/username
+            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            existing_user = cur.fetchone()
 
-        if existing_user:
+            if existing_user:
+                cur.close()
+                conn.close()
+                return jsonify({"error": "Username or email already exists"}), 409
+
+            # Save to DB: Store the user and return the new ID
+            cur.execute("""
+                INSERT INTO users (username, email, password_hash)
+                VALUES (%s, %s, %s)
+                RETURNING id, username, email, created_at
+            """, (username, email, password_hash))
+
+            user = cur.fetchone()
+            conn.commit()
             cur.close()
             conn.close()
-            return jsonify({"error": "Username or email already exists"}), 409
 
-        # Save to DB: Store the user and return the new ID
-        cur.execute("""
-            INSERT INTO users (username, email, password_hash)
-            VALUES (%s, %s, %s)
-            RETURNING id, username, email, created_at
-        """, (username, email, password_hash))
+            #Token: Give the user their "Digital ID Card" (JWT) immediately
+            token = jwt.encode({
+                'user_id': user[0],
+                'username': user[1],
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)  # Token expires in 7 days
+            }, SECRET_KEY, algorithm='HS256')
 
-        user = cur.fetchone()
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        #Token: Give the user their "Digital ID Card" (JWT) immediately
-        token = jwt.encode({
-            'user_id': user[0],
-            'username': user[1],
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)  # Token expires in 7 days
-        }, SECRET_KEY, algorithm='HS256')
-
-        return jsonify({
-            "message": "User registered successfully",
-            "token": token,
-            "user": {
-                "id": user[0],
-                "username": user[1],
-                "email": user[2],
-                "created_at": user[3].isoformat()
-            }
-        }), 201
+            return jsonify({
+                "message": "User registered successfully",
+                "token": token,
+                "user": {
+                    "id": user[0],
+                    "username": user[1],
+                    "email": user[2],
+                    "created_at": user[3].isoformat()
+                }
+            }), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -82,6 +82,7 @@ def register():
 def login():
     """Login user and return JWT token"""
     try:
+
         data = request.get_json()
 
         # Validate input
