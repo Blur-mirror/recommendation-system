@@ -380,7 +380,7 @@ flask-bcrypt==1.0.1    # Secure password hashing
 
 ---
 
-##Migration Guide
+## Migration Guide
 
 **From previous version:**
 
