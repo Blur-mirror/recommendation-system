@@ -367,7 +367,7 @@ flask-bcrypt==1.0.1    # Secure password hashing
 
 ---
 
-##Screenshots
+## Screenshots
 
 - Login/Register modal
   <img width="1919" height="966" alt="image" src="https://github.com/user-attachments/assets/3eb26c76-c0b8-4fe5-ad94-f03125028611" />
@@ -380,7 +380,7 @@ flask-bcrypt==1.0.1    # Secure password hashing
 
 ---
 
-## 🔄 Migration Guide
+##Migration Guide
 
 **From previous version:**
 
