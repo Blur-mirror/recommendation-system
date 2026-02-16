@@ -13,7 +13,7 @@
 
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #124846 0%, #040246 100%);
+        background: linear-gradient(135deg, #121420 30%, #403f4c 100%);
         min-height: 100vh;
         padding: 20px;
       }
@@ -24,9 +24,18 @@
       }
 
       header {
-        text-align: center;
-        color: rgb(255, 255, 255);
+        color: white;
         margin-bottom: 40px;
+        padding-top: 60px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .header-content {
+        text-align: center;
       }
 
       h1 {
@@ -40,6 +49,201 @@
         opacity: 0.9;
       }
 
+      /* User Profile Section */
+      .user-section {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        z-index: 100;
+      }
+
+      @media (max-width: 768px) {
+        .user-section {
+          position: relative;
+          top: auto;
+          right: auto;
+          justify-content: center;
+          margin-top: 10px;
+        }
+      }
+
+      .user-info {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px 20px;
+        border-radius: 25px;
+        color: rgb(255, 255, 255);
+        display: none;
+      }
+
+      .user-info.logged-in {
+        display: block;
+      }
+
+      .btn {
+        background: #c3f73a;
+        color: black;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-logout {
+        background: #121420;
+        color: white;
+      }
+
+      .btn-logout:hover {
+        background: #2c2b3c;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s;
+      }
+
+      .modal.active {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .modal-content {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .modal-header h2 {
+        color: #1b2432;
+        font-size: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 600;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border 0.3s;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #182665;
+      }
+
+      .btn-primary {
+        width: 100%;
+        background: #c3f73a;
+        color: black;
+        padding: 15px;
+        font-size: 1.1rem;
+        margin-top: 10px;
+      }
+
+      .btn-primary:hover {
+        background: #a2cf31;
+      }
+
+      .modal-footer {
+        text-align: center;
+        margin-top: 20px;
+        color: #1b2432;
+      }
+
+      .modal-footer a {
+        color: #1b2432;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .error-message {
+        background: #f44336;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        display: none;
+      }
+
+      .error-message.active {
+        display: block;
+      }
+
+      .success-message {
+        background: #4caf50;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        display: none;
+      }
+
+      .success-message.active {
+        display: block;
+      }
+
       .tabs {
         display: flex;
         justify-content: center;
@@ -48,7 +252,7 @@
       }
 
       .tab-btn {
-        background: rgb(255, 255, 255);
+        background: #ececed;
         border: none;
         padding: 15px 40px;
         font-size: 1.1rem;
@@ -64,12 +268,12 @@
       }
 
       .tab-btn.active {
-        background: #1eafab;
+        background: #1b2432;
         color: white;
       }
 
       .search-box {
-        background: rgb(240, 239, 239);
+        background: white;
         padding: 20px;
         border-radius: 15px;
         margin-bottom: 30px;
@@ -80,14 +284,14 @@
         width: 100%;
         padding: 15px;
         font-size: 1rem;
-        border: 2px solid #e3e3e3;
+        border: 2px solid #ddd;
         border-radius: 10px;
         outline: none;
         transition: border 0.3s;
       }
 
       .search-input:focus {
-        border-color: #1eafab;
+        border-color: #667eea;
       }
 
       .filters {
@@ -120,18 +324,21 @@
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 25px;
         margin-bottom: 40px;
       }
 
       .card {
-        background: white;
+        background: #1b2432;
         border-radius: 15px;
         padding: 20px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         transition: all 0.3s;
         cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
       }
 
       .card:hover {
@@ -140,14 +347,14 @@
       }
 
       .card h3 {
-        color: #333;
+        color: white;
         margin-bottom: 10px;
         font-size: 1.2rem;
         min-height: 60px;
       }
 
       .card-info {
-        color: #666;
+        color: white;
         font-size: 0.9rem;
         margin: 5px 0;
       }
@@ -157,7 +364,7 @@
         background: #ffd700;
         color: #333;
         padding: 5px 12px;
-        border-radius: 20px;
+        border-radius: 10px;
         font-weight: bold;
         margin-top: 10px;
       }
@@ -168,13 +375,87 @@
       }
 
       .rating.medium {
-        background: #e58a02;
+        background: #ff9800;
         color: white;
       }
 
       .rating.low {
         background: #f44336;
         color: white;
+      }
+
+      .rating.no {
+        background: #7e7d7d;
+        color: white;
+      }
+
+      /* Star Rating Styles */
+      .rating-section {
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+        margin-top: 10px;
+      }
+
+      .user-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .star-rating {
+        display: flex;
+        gap: 5px;
+        font-size: 1.5rem;
+      }
+
+      .star {
+        cursor: pointer;
+        color: #ddd;
+        transition: all 0.2s;
+      }
+
+      .star.filled {
+        color: #ffd700;
+      }
+
+      .star:hover {
+        transform: scale(1.2);
+      }
+
+      .star.clickable:hover ~ .star {
+        color: #ddd;
+      }
+
+      .star.clickable:hover {
+        color: #ffd700;
+      }
+
+      .rating-info {
+        font-size: 0.85rem;
+        color: white;
+        margin-top: 5px;
+      }
+
+      .your-rating-badge {
+        display: inline-block;
+        background: #c3f73a;
+        color: black;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .login-prompt {
+        font-size: 0.85rem;
+        color: #c3f73a;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .login-prompt:hover {
+        text-decoration: underline;
       }
 
       .loading {
@@ -194,7 +475,7 @@
       }
 
       .stats {
-        background: white;
+        background: #e3e4e5;
         padding: 15px;
         border-radius: 10px;
         margin-bottom: 20px;
@@ -204,19 +485,137 @@
 
       .stats span {
         font-weight: bold;
-        color: #764ba2;
+        color: #1b2432;
         font-size: 1.2rem;
+      }
+
+      .rating-loading {
+        font-size: 0.85rem;
+        color: #999;
+        font-style: italic;
+      }
+
+      .rating-loading {
+        font-size: 0.85rem;
+        color: #999;
+        font-style: italic;
+      }
+
+      .recommendation-reason {
+        font-size: 0.85rem;
+        color: #e7f73a;
+        font-style: italic;
+        margin-top: 5px;
+        font-weight: 600;
+      }
+
+      .recommendation-type-badge {
+        display: inline-block;
+        background: #2da539;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .popular {
+        display: inline-block;
+        background: #2da539;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .no-recommendations {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        padding: 40px;
+        min-height: 400px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      .no-recommendations h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        width: 100%;
+      }
+
+      .no-recommendations p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+        width: 100%;
+      }
+
+      .no-recommendations button {
+        background: #c3f73a;
+        color: black;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .no-recommendations button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       }
     </style>
   </head>
   <body>
     <div class="container">
       <header>
-        <h1> Movie & Book Recommender </h1>
-        <p class="tagline">Discover your next favorite movie or book</p>
+        <div class="header-content">
+          <h1>Movie & Book Recommender</h1>
+          <p class="tagline">Discover your next favorite movie or book</p>
+        </div>
+
+        <!-- User Section -->
+        <div class="user-section">
+          <div class="user-info" id="userInfo">
+            <span id="username"></span>
+          </div>
+          <button class="btn" id="loginBtn" onclick="showLoginModal()">
+            Login
+          </button>
+          <button
+            class="btn btn-logout"
+            id="logoutBtn"
+            onclick="logout()"
+            style="display: none"
+          >
+            Logout
+          </button>
+
+          <button
+            class="btn"
+            id="clearRatingsBtn"
+            onclick="clearAllRatings()"
+            style="display: none; background: #e35f4b; color: white"
+            title="Debug: Clear all your ratings"
+          >
+            Clear Ratings
+          </button>
+        </div>
       </header>
 
       <div class="tabs">
+        <button class="tab-btn" onclick="switchTab('recommendations')">
+          For You
+        </button>
         <button class="tab-btn active" onclick="switchTab('movies')">
           Movies
         </button>
@@ -244,39 +643,352 @@
       </div>
     </div>
 
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Login</h2>
+        </div>
+
+        <div class="error-message" id="authError"></div>
+        <div class="success-message" id="authSuccess"></div>
+
+        <form id="authForm" onsubmit="handleAuth(event)">
+          <div class="form-group" id="emailGroup" style="display: none">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email" />
+          </div>
+
+          <div class="form-group">
+            <label for="authUsername">Username</label>
+            <input
+              type="text"
+              id="authUsername"
+              placeholder="Enter your username"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="authPassword">Password</label>
+            <input
+              type="password"
+              id="authPassword"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="authSubmitBtn">
+            Login
+          </button>
+        </form>
+
+        <div class="modal-footer">
+          <span id="toggleAuthText"
+            >Don't have an account?
+            <a onclick="toggleAuthMode()">Register</a></span
+          >
+        </div>
+      </div>
+    </div>
+
     <script>
       let currentTab = "movies";
       let allData = [];
+      let isLoginMode = true;
+      let currentUser = null;
 
       // API Base URL
       const API_URL = "http://localhost:5000/api";
 
       // Initialize on page load
-      window.onload = () => {
-        loadData("movies");
+      // Initialize on page load
+      window.onload = async () => {
+        await checkAuth();
+        loadRecommendations(); // Now this waits for auth check
       };
 
-      // Switch between Movies and Books
+      // Check if user is logged in
+      async function checkAuth() {
+        const token = localStorage.getItem("token");
+
+        if (token) {
+          try {
+            const res = await fetch(`${API_URL}/auth/verify`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            const data = await res.json();
+
+            if (data.valid) {
+              currentUser = data.user;
+              updateUIForLoggedInUser();
+            } else {
+              localStorage.removeItem("token");
+            }
+          } catch (err) {
+            console.error("Auth check failed:", err);
+            localStorage.removeItem("token");
+          }
+        }
+      }
+
+      // Update UI when user is logged in
+      function updateUIForLoggedInUser() {
+        document.getElementById("username").textContent = currentUser.username;
+        document.getElementById("userInfo").classList.add("logged-in");
+        document.getElementById("loginBtn").style.display = "none";
+        document.getElementById("logoutBtn").style.display = "block";
+        document.getElementById("clearRatingsBtn").style.display = "block";
+      }
+
+      // Show login modal
+      function showLoginModal() {
+        document.getElementById("loginModal").classList.add("active");
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function (event) {
+        const modal = document.getElementById("loginModal");
+        if (event.target === modal) {
+          modal.classList.remove("active");
+        }
+      };
+
+      // Toggle between login and register
+      function toggleAuthMode() {
+        isLoginMode = !isLoginMode;
+
+        const modalTitle = document.getElementById("modalTitle");
+        const emailGroup = document.getElementById("emailGroup");
+        const submitBtn = document.getElementById("authSubmitBtn");
+        const toggleText = document.getElementById("toggleAuthText");
+
+        if (isLoginMode) {
+          modalTitle.textContent = "Login";
+          emailGroup.style.display = "none";
+          submitBtn.textContent = "Login";
+          toggleText.innerHTML =
+            'Don\'t have an account? <a onclick="toggleAuthMode()">Register</a>';
+        } else {
+          modalTitle.textContent = "Register";
+          emailGroup.style.display = "block";
+          submitBtn.textContent = "Register";
+          toggleText.innerHTML =
+            'Already have an account? <a onclick="toggleAuthMode()">Login</a>';
+        }
+
+        document.getElementById("authError").classList.remove("active");
+        document.getElementById("authSuccess").classList.remove("active");
+      }
+
+      // Handle login/register
+      async function handleAuth(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("authUsername").value;
+        const password = document.getElementById("authPassword").value;
+        const email = document.getElementById("email").value;
+
+        const errorDiv = document.getElementById("authError");
+        const successDiv = document.getElementById("authSuccess");
+
+        errorDiv.classList.remove("active");
+        successDiv.classList.remove("active");
+
+        const endpoint = isLoginMode ? "/auth/login" : "/auth/register";
+        const payload = isLoginMode
+          ? { username, password }
+          : { username, email, password };
+
+        try {
+          const response = await fetch(`${API_URL}${endpoint}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            localStorage.setItem("token", data.token);
+            currentUser = data.user;
+
+            successDiv.textContent = data.message;
+            successDiv.classList.add("active");
+
+            updateUIForLoggedInUser();
+
+            setTimeout(() => {
+              document.getElementById("loginModal").classList.remove("active");
+              document.getElementById("authForm").reset();
+              loadData(currentTab); // Reload to show rating options
+            }, 1000);
+          } else {
+            errorDiv.textContent = data.error || "An error occurred";
+            errorDiv.classList.add("active");
+          }
+        } catch (error) {
+          errorDiv.textContent = "Network error. Please try again.";
+          errorDiv.classList.add("active");
+        }
+      }
+
+      // Logout
+      function logout() {
+        localStorage.removeItem("token");
+        currentUser = null;
+
+        document.getElementById("userInfo").classList.remove("logged-in");
+        document.getElementById("loginBtn").style.display = "block";
+        document.getElementById("logoutBtn").style.display = "none";
+        document.getElementById("clearRatingsBtn").style.display = "none";
+
+        // Handle logout based on current tab
+        if (currentTab === "recommendations") {
+          loadRecommendations(); // Show "login to see recommendations" message
+        } else {
+          loadData(currentTab); // Reload movies/books without ratings
+        }
+
+        alert("Logged out successfully!");
+      }
+
+      // Switch between Movies, Books, and Recommendations
       function switchTab(tab) {
         currentTab = tab;
 
-        // Update tab buttons
         document.querySelectorAll(".tab-btn").forEach((btn) => {
           btn.classList.remove("active");
         });
         event.target.classList.add("active");
 
-        // Clear search
         document.getElementById("searchInput").value = "";
 
-        // Load data
-        loadData(tab);
+        if (tab === "recommendations") {
+          loadRecommendations();
+        } else {
+          loadData(tab);
+        }
       }
 
+      // Load recommendations
+      async function loadRecommendations() {
+        const contentDiv = document.getElementById("content");
+        const statsDiv = document.getElementById("stats");
+        const searchBox = document.querySelector(".search-box");
+
+        // Hide search box for recommendations
+        searchBox.style.display = "none";
+
+        if (!currentUser) {
+          contentDiv.style.display = "block";
+          contentDiv.innerHTML = `
+  <div class="no-recommendations">
+    <h2> Get Personalized Recommendations!</h2>
+    <p>Login to see movies and books picked just for you</p>
+    <button onclick="showLoginModal()">Login Now</button>
+  </div>
+`;
+          statsDiv.style.display = "none";
+          return;
+        }
+
+        try {
+          contentDiv.innerHTML =
+            '<div class="loading">Loading your recommendations...</div>';
+          statsDiv.style.display = "block";
+          statsDiv.innerHTML = "Analyzing your taste...";
+
+          const token = localStorage.getItem("token");
+
+          // Fetch movie recommendations
+          const movieResponse = await fetch(
+            `${API_URL}/recommendations/movies`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+
+          // Fetch book recommendations
+          const bookResponse = await fetch(`${API_URL}/recommendations/books`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!movieResponse.ok || !bookResponse.ok) {
+            throw new Error("Failed to load recommendations");
+          }
+
+          const movieData = await movieResponse.json();
+          const bookData = await bookResponse.json();
+
+          const allRecommendations = [
+            ...movieData.recommendations.map((r) => ({
+              ...r,
+              content_type: "movies",
+            })),
+            ...bookData.recommendations.map((r) => ({
+              ...r,
+              content_type: "books",
+            })),
+          ];
+
+          if (allRecommendations.length === 0) {
+            contentDiv.style.display = "block";
+            contentDiv.innerHTML = `
+        <div class="no-recommendations">
+          <h2>📊 Not Enough Data Yet</h2>
+          <p>Rate at least 3 movies or books to get personalized recommendations!</p>
+          <button onclick="switchTab('movies')">Start Rating Movies</button>
+        </div>
+      `;
+            statsDiv.innerHTML =
+              "Rate more items to get better recommendations";
+            return;
+          }
+
+          statsDiv.innerHTML = `<span>${allRecommendations.length}</span> personalized recommendations for you`;
+
+          // Render recommendations
+          const html = allRecommendations
+            .map((item) => {
+              if (item.content_type === "movies") {
+                return createRecommendationCard(item, "movie");
+              } else {
+                return createRecommendationCard(item, "book");
+              }
+            })
+            .join("");
+
+          contentDiv.style.display = "grid"; // Set back to grid
+          contentDiv.innerHTML = html;
+        } catch (error) {
+          console.error("Error loading recommendations:", error);
+          contentDiv.innerHTML = `
+      <div class="error">
+        ❌ Error loading recommendations<br>
+        <small>${error.message}</small>
+      </div>
+    `;
+        }
+      }
       // Load data from API
       async function loadData(type) {
         const contentDiv = document.getElementById("content");
         const statsDiv = document.getElementById("stats");
+        const searchBox = document.querySelector(".search-box");
+
+        // Show search box for movies/books
+        searchBox.style.display = "block";
+        statsDiv.style.display = "block";
 
         try {
           contentDiv.innerHTML = '<div class="loading">Loading...</div>';
@@ -290,14 +1002,10 @@
           const data = await response.json();
           allData = data[type] || [];
 
-          // Update stats
           statsDiv.innerHTML = `Found <span>${allData.length}</span> ${type}`;
 
-          // Render filters
           renderFilters(type);
-
-          // Render content
-          renderContent(allData, type);
+          await renderContentWithRatings(allData, type);
         } catch (error) {
           console.error("Error loading data:", error);
           contentDiv.innerHTML = `
@@ -309,7 +1017,152 @@
         }
       }
 
-      // Render filters based on content type
+      // Render content with ratings
+      async function renderContentWithRatings(data, type) {
+        const contentDiv = document.getElementById("content");
+
+        if (data.length === 0) {
+          contentDiv.innerHTML = '<div class="loading">No results found</div>';
+          return;
+        }
+
+        // First render cards without ratings
+        const html = data
+          .map((item) => {
+            if (type === "movies") {
+              return createMovieCard(item);
+            } else {
+              return createBookCard(item);
+            }
+          })
+          .join("");
+
+        contentDiv.innerHTML = html;
+
+        // Then load ratings for each item
+        for (let item of data) {
+          await loadRatingForItem(type, item.id);
+        }
+      }
+
+      // Load rating for a specific item
+      async function loadRatingForItem(contentType, contentId) {
+        try {
+          const headers = {};
+          const token = localStorage.getItem("token");
+
+          if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+          }
+
+          const response = await fetch(
+            `${API_URL}/ratings/${contentType}/${contentId}`,
+            {
+              headers: headers,
+            },
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            updateCardWithRating(contentType, contentId, data);
+          }
+        } catch (error) {
+          console.error("Error loading rating:", error);
+        }
+      }
+
+      // Update card with rating data
+      function updateCardWithRating(contentType, contentId, ratingData) {
+        const cardRatingDiv = document.getElementById(
+          `rating-${contentType}-${contentId}`,
+        );
+
+        if (!cardRatingDiv) return;
+
+        const { average_rating, total_ratings, your_rating } = ratingData;
+
+        let html = "";
+
+        if (currentUser) {
+          // User is logged in - show interactive stars
+          html += '<div class="user-rating">';
+          html +=
+            '<div class="star-rating" id="stars-' +
+            contentType +
+            "-" +
+            contentId +
+            '">';
+
+          for (let i = 1; i <= 5; i++) {
+            const filled = your_rating && i <= your_rating ? "filled" : "";
+            html += `<span class="star clickable ${filled}" onclick="rateItem('${contentType}', ${contentId}, ${i})">★</span>`;
+          }
+
+          html += "</div>";
+
+          if (your_rating) {
+            html += `<span class="your-rating-badge">Your rating: ${your_rating}/5</span>`;
+          }
+
+          html += "</div>";
+        } else {
+          // User not logged in
+          html +=
+            '<div class="login-prompt" onclick="showLoginModal()">Login to rate</div>';
+        }
+
+        // Show average rating
+        if (total_ratings > 0) {
+          html += `<div class="rating-info">Average: ${average_rating}/5 (${total_ratings} ${total_ratings === 1 ? "rating" : "ratings"})</div>`;
+        } else {
+          html +=
+            '<div class="rating-info">No ratings yet. Be the first!</div>';
+        }
+
+        cardRatingDiv.innerHTML = html;
+      }
+
+      // Rate an item
+      async function rateItem(contentType, contentId, rating) {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          showLoginModal();
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_URL}/ratings/${contentType}/${contentId}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ rating }),
+            },
+          );
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Update the card with new rating data
+            updateCardWithRating(contentType, contentId, {
+              average_rating: data.average_rating,
+              total_ratings: data.total_ratings,
+              your_rating: data.your_rating,
+            });
+          } else {
+            alert("Error: " + data.error);
+          }
+        } catch (error) {
+          console.error("Error rating item:", error);
+          alert("Failed to submit rating. Please try again.");
+        }
+      }
+
+      // Render filters
       function renderFilters(type) {
         const filtersDiv = document.getElementById("filters");
 
@@ -369,7 +1222,7 @@
           return true;
         });
 
-        renderContent(filtered, currentTab);
+        renderContentWithRatings(filtered, currentTab);
       }
 
       // Search handler
@@ -394,29 +1247,7 @@
           }
         });
 
-        renderContent(filtered, currentTab);
-      }
-
-      // Render content cards
-      function renderContent(data, type) {
-        const contentDiv = document.getElementById("content");
-
-        if (data.length === 0) {
-          contentDiv.innerHTML = '<div class="loading">No results found</div>';
-          return;
-        }
-
-        const html = data
-          .map((item) => {
-            if (type === "movies") {
-              return createMovieCard(item);
-            } else {
-              return createBookCard(item);
-            }
-          })
-          .join("");
-
-        contentDiv.innerHTML = html;
+        renderContentWithRatings(filtered, currentTab);
       }
 
       // Create movie card
@@ -427,8 +1258,11 @@
         return `
                 <div class="card">
                     <h3>${movie.title}</h3>
-                    <p class="card-info">📅 ${movie.release_year || "N/A"}</p>
+                    <p class="card-info">Year: ${movie.release_year || "N/A"}</p>
                     <span class="rating ${ratingClass}">⭐ ${movie.rating.toFixed(1)}</span>
+                    <div class="rating-section">
+                        <div id="rating-movies-${movie.id}" class="rating-loading">Loading ratings...</div>
+                    </div>
                 </div>
             `;
       }
@@ -443,10 +1277,76 @@
         return `
                 <div class="card">
                     <h3>${book.title}</h3>
-                    <p class="card-info">✍️ ${book.authors}</p>
-                    ${book.rating > 0 ? `<span class="rating ${ratingClass}">⭐ ${ratingDisplay}</span>` : '<span class="rating low">No rating</span>'}
+                    <p class="card-info">Author: ${book.authors}</p>
+                    ${book.rating > 0 ? `<span class="rating ${ratingClass}">⭐ ${ratingDisplay}</span>` : '<span class="rating no">No rating</span>'}
+                    <div class="rating-section">
+                        <div id="rating-books-${book.id}" class="rating-loading">Loading ratings...</div>
+                    </div>
                 </div>
             `;
+      }
+
+      // Create recommendation card
+      function createRecommendationCard(item, type) {
+        const isMovie = type === "movie";
+        const ratingClass =
+          item.rating >= (isMovie ? 8 : 4)
+            ? "high"
+            : item.rating >= (isMovie ? 6 : 3)
+              ? "medium"
+              : "low";
+
+        return `
+    <div class="card">
+      <span class="recommendation-type-badge">${item.recommendation_type.replace("_", " ").toUpperCase()}</span>
+      <h3>${item.title}</h3>
+      <p class="card-info">${isMovie ? "Year:" : "Author:"} ${isMovie ? item.release_year || "N/A" : item.authors}</p>
+
+    </div>
+  `;
+      }
+
+      //DEBUG ONLYYY!!!
+
+      // Clear all user ratings (DEBUG ONLY)
+      async function clearAllRatings() {
+        if (
+          !confirm(
+            "⚠️ This will DELETE ALL your ratings! Are you sure? (This is for testing only)",
+          )
+        ) {
+          return;
+        }
+
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        try {
+          // Get all user's ratings from database
+          const response = await fetch(`${API_URL}/ratings/clear-all`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            alert("✅ All ratings cleared! Refresh to see changes.");
+
+            // Reload current view
+            if (currentTab === "recommendations") {
+              loadRecommendations();
+            } else {
+              loadData(currentTab);
+            }
+          } else {
+            const data = await response.json();
+            alert("Error: " + data.error);
+          }
+        } catch (error) {
+          console.error("Error clearing ratings:", error);
+          alert("Failed to clear ratings. Check console.");
+        }
       }
     </script>
   </body>
