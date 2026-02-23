@@ -1,6 +1,7 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  #This is the database and instructions for docker to eventually store the calls so we don't use too many requests.
   db:
     image: postgres:15
     container_name: recommender_db
@@ -12,7 +13,44 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - recommender-network
+
+  backend:
+    #This is the backend (FLASK)
+    build: ./backend #this looks for the Dockerfile with instructions for the build
+    container_name: recommender_backend
+    env_file: .env #added .env instructions as movies were not being fetched successfully
+    environment:
+      DB_HOST: db
+      DB_NAME: recommender
+      DB_USER: postgres
+      DB_PASS: pass
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY} #include the JWT secret for user auth
+    ports:
+      - "5000:5000" #enables the port so we can use flask on it and get results from the requests.
+    depends_on:
+      - db #this ensures the flask won't start until the DB is ready to avoid crashes
+    networks:
+      - recommender-network #the bridge between flask and the database so they can communicate
+    volumes:
+      - ./backend:/app #this account for any changes in the code so they are updated in docker
+
+  frontend: #added frontend support
+    image: nginx:alpine
+    container_name: recommender_frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    networks:
+      - recommender-network
+    depends_on:
+      - backend
+
+networks:
+  recommender-network: #same as above, a communicator between the services.
+    driver: bridge
 
 volumes:
-  pgdata:
-
+  pgdata: #physical storage space for DB files

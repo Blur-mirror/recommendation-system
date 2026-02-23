@@ -1,4 +1,7 @@
 requests
 psycopg2-binary
 python-dotenv
-
+flask
+flask-cors
+PyJWT
+flask-bcrypt
