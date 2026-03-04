@@ -7,11 +7,13 @@ from routes.auth import auth_bp
 from routes.ratings import ratings_bp  # new routes for user ratings
 from routes.recommendations import recommendations_bp  # recommendation routes
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from db import get_connection
 
 app = Flask(__name__)
 # CORS allows the frontend to talk to this backend
 # without being blocked by browser security rules.
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 bcrypt = Bcrypt(app)
 
 # Register blueprints
@@ -43,6 +45,24 @@ def home():
         }
     }), 200
 
-# This starts the server
+
+
+
+def init_db_extras():
+    
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;")
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("✅ Base de datos verificada y lista.")
+    except Exception as e:
+        print(f"ℹ️ Info DB: {e}")
+
 if __name__ == '__main__':
+    init_db_extras()  
+    
     app.run(host='0.0.0.0', port=5000, debug=True)

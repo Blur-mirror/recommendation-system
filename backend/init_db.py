@@ -11,7 +11,9 @@ def create_tables():
             title VARCHAR(255) NOT NULL,
             release_year INTEGER,
             rating DECIMAL(3, 1),
+            poster_path TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            
         )
     """)
 
@@ -22,7 +24,9 @@ def create_tables():
             title VARCHAR(255) NOT NULL,
             authors VARCHAR(500),
             rating DECIMAL(3, 1),
+            thumbnail TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            
         )
     """)
 
@@ -34,10 +38,11 @@ def create_tables():
             email VARCHAR(100) UNIQUE NOT NULL,
             password_hash VARCHAR(255) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            
         )
     """)
 
-     # Create ratings table
+    # Create ratings table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS ratings (
             id SERIAL PRIMARY KEY,
