@@ -945,7 +945,7 @@
             contentDiv.style.display = "block";
             contentDiv.innerHTML = `
         <div class="no-recommendations">
-          <h2>📊 Not Enough Data Yet</h2>
+          <h2> Not Enough Data Yet</h2>
           <p>Rate at least 3 movies or books to get personalized recommendations!</p>
           <button onclick="switchTab('movies')">Start Rating Movies</button>
         </div>
@@ -974,7 +974,7 @@
           console.error("Error loading recommendations:", error);
           contentDiv.innerHTML = `
       <div class="error">
-        ❌ Error loading recommendations<br>
+         Error loading recommendations<br>
         <small>${error.message}</small>
       </div>
     `;

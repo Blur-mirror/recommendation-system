@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Demo Panel</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        /* The true 90s neutral gray */
+        background-color: #c0c0c0;
+        font-family: "Times New Roman", Times, serif;
+        padding: 20px;
+        color: #000;
+      }
+
+      .container {
+        max-width: 850px;
+        margin: 0 auto;
+        border: 2px outset #ffffff; /* Makes the whole page look like a pop-up window */
+        padding: 10px;
+        background: #c0c0c0;
+      }
+
+      /* The Dark Blue Header Bar you were missing! */
+      h1 {
+        background: #000080; /* Classic Win95/Netscape Title Blue */
+        color: white;
+        font-size: 18px;
+        padding: 5px 10px;
+        text-align: left;
+        margin-bottom: 20px;
+        font-family: Arial, Helvetica, sans-serif;
+        border: 1px inset #fff;
+      }
+
+      .auth-section,
+      .section {
+        border: 2px inset #808080;
+        background: #dcdcdc;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 18px;
+        color: #000080; /* The dark blue for section titles */
+        margin-bottom: 12px;
+        border-bottom: 2px solid #000080;
+        display: block;
+        width: 100%;
+      }
+
+      /* Sunken input fields */
+      input {
+        background: #ffffff;
+        border: 2px inset #808080;
+        padding: 3px;
+        font-family: Arial, sans-serif;
+        margin-bottom: 5px;
+      }
+
+      /* Classic Gray System Button */
+      button {
+        background: #c0c0c0;
+        border: 2px outset #ffffff;
+        padding: 3px 15px;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        font-weight: bold;
+        color: #000;
+      }
+
+      button:active {
+        border: 2px inset #ffffff;
+        background: #b0b0b0;
+      }
+
+      /* The "Links" look - Bright Blue */
+      .endpoint-btn {
+        display: list-item; /* Makes them look like a bulleted list */
+        list-style-type: square;
+        margin-left: 20px;
+        margin-bottom: 5px;
+        color: #0000ff;
+        text-decoration: underline;
+        background: none;
+        border: none;
+        font-family: "Times New Roman", serif;
+        font-size: 16px;
+        font-weight: normal;
+        text-align: left;
+      }
+
+      .endpoint-btn:hover {
+        color: #ff0000; /* Old school hover red */
+        cursor: pointer;
+      }
+
+      /* Response windows looking like raw text files */
+      .output,
+      .token-display {
+        white-space: pre; /* Crucial: Maintains the "ladder" spaces and line breaks */
+        overflow-x: auto; /* Adds a horizontal scrollbar if the lines are too long */
+        word-break: normal; /* Prevents the browser from breaking lines mid-word */
+        font-size: 12px;
+        line-height: 1.2;
+        background: #ffffff;
+        border: 2px inset #808080;
+        padding: 10px;
+        color: #000;
+        font-family: "Courier New", monospace;
+      }
+      .token-display {
+        height: auto;
+        background: #ffffcc; /* Slightly yellowed "sticky note" look for tokens */
+      }
+
+      .status.success {
+        color: #008000;
+        font-weight: bold;
+        border: 1px dashed #008000;
+        padding: 2px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Final touch: the Horizontal Rule */
+      hr {
+        border: 0;
+        border-top: 2px groove #ffffff;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ADMIN DEMO PANEL - TEMPORARY</h1>
+      <p>
+        Welcome to the Admin Portal. You should try it in Netscape Navigator 2.0
+        at 800x600 resolution!
+      </p>
+      <hr />
+
+      <!-- Login Section -->
+      <div class="auth-section">
+        <h2>Step 1: Login</h2>
+        <input
+          type="text"
+          id="username"
+          placeholder="Username"
+          value="malvadosapo"
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          value="Antonioadolfo123"
+        />
+        <button onclick="login()">Login</button>
+        <span id="loginStatus"></span>
+
+        <div id="tokenDisplay" class="token-display hidden">
+          <strong>Your Token (auto-saved):</strong><br />
+          <span id="token"></span>
+          <button onclick="copyToken()" style="margin-top: 10px">
+            Copy Token
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Endpoints -->
+      <div id="adminSection" class="section hidden">
+        <h2>Admin Endpoints</h2>
+
+        <button
+          class="endpoint-btn"
+          onclick="fetchEndpoint('/api/admin/stats')"
+        >
+          Dashboard Stats
+        </button>
+
+        <button
+          class="endpoint-btn"
+          onclick="fetchEndpoint('/api/admin/users')"
+        >
+          All Users
+        </button>
+
+        <button
+          class="endpoint-btn"
+          onclick="fetchEndpoint('/api/admin/ratings')"
+        >
+          All Ratings
+        </button>
+
+        <button
+          class="endpoint-btn"
+          onclick="fetchEndpoint('/api/admin/activity')"
+        >
+          Recent Activity
+        </button>
+
+        <div class="output" id="output">Response will appear here...</div>
+      </div>
+
+      <!-- Profile Endpoints -->
+      <div id="profileSection" class="section hidden">
+        <h2>User Profile Endpoints</h2>
+
+        <button class="endpoint-btn" onclick="fetchEndpoint('/api/profile/')">
+          My Profile
+        </button>
+
+        <button
+          class="endpoint-btn"
+          onclick="fetchEndpoint('/api/profile/ratings')"
+        >
+          My Ratings
+        </button>
+
+        <div class="output" id="profileOutput">
+          Response will appear here...
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div id="recoSection" class="section hidden">
+        <h2>Recommendations</h2>
+
+        <button
+          class="endpoint-btn"
+          onclick="fetchEndpoint('/api/recommendations/movies')"
+        >
+          Movie Recommendations
+        </button>
+
+        <button
+          class="endpoint-btn"
+          onclick="fetchEndpoint('/api/recommendations/books')"
+        >
+          Book Recommendations
+        </button>
+
+        <div class="output" id="recoOutput">Response will appear here...</div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:5000";
+      let authToken = localStorage.getItem("demo_token");
+
+      // Check if already logged in
+      window.onload = () => {
+        if (authToken) {
+          document.getElementById("tokenDisplay").classList.remove("hidden");
+          document.getElementById("token").textContent = authToken;
+          showAdminSections();
+        }
+      };
+
+      async function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const statusEl = document.getElementById("loginStatus");
+
+        try {
+          const response = await fetch(`${API_URL}/api/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            authToken = data.token;
+            localStorage.setItem("demo_token", authToken);
+
+            document.getElementById("token").textContent = authToken;
+            document.getElementById("tokenDisplay").classList.remove("hidden");
+
+            statusEl.innerHTML =
+              '<span class="status success">✓ Logged in!</span>';
+            showAdminSections();
+          } else {
+            statusEl.innerHTML = `<span class="status error">✗ ${data.error}</span>`;
+          }
+        } catch (error) {
+          statusEl.innerHTML = `<span class="status error">✗ Network error</span>`;
+        }
+      }
+
+      function showAdminSections() {
+        document.getElementById("adminSection").classList.remove("hidden");
+        document.getElementById("profileSection").classList.remove("hidden");
+        document.getElementById("recoSection").classList.remove("hidden");
+      }
+
+      async function fetchEndpoint(endpoint) {
+        // Determine which output div to use
+        let outputEl;
+        if (endpoint.includes("/admin/")) {
+          outputEl = document.getElementById("output");
+        } else if (endpoint.includes("/profile/")) {
+          outputEl = document.getElementById("profileOutput");
+        } else {
+          outputEl = document.getElementById("recoOutput");
+        }
+
+        outputEl.textContent = "Loading...";
+
+        try {
+          const response = await fetch(`${API_URL}${endpoint}`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+
+          const data = await response.json();
+          outputEl.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          outputEl.textContent = `Error: ${error.message}`;
+        }
+      }
+
+      function copyToken() {
+        navigator.clipboard.writeText(authToken);
+        alert("Token copied to clipboard!");
+      }
+    </script>
+  </body>
+</html>
