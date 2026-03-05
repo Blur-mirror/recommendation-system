@@ -1,0 +1,35 @@
+name: Docker Build Check
+
+on:
+  pull_request:
+    branches: [dev]
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Pull the code from your repo onto the GitHub machine
+      - uses: actions/checkout@v3
+
+      # 2. Check for Python syntax errors in the backend code
+      - name: Python Syntax Check
+        run: |
+          python3 -m py_compile backend/*.py backend/routes/*.py
+
+      # 3. Create a dummy .env file so Docker Compose doesn't crash
+      - name: Setup Environment
+        run: |
+          touch .env
+          echo "DATABASE_URL=postgresql://user:pass@db:5432/dbname" >> .env
+          echo "TMDB_API_KEY=dummy_key" >> .env
+          echo "GOOGLE_BOOKS_KEY=dummy_key" >> .env
+          echo "JWT_SECRET_KEY=dummy_key" >> .env
+
+      # 4. Try to build the Docker containers
+      - name: Build Docker Containers
+        run: docker compose build
+
+      # 5. Run a "Smoke Test" on the DB script
+      # Note: This will check if the script is RUNNABLE, even without a real DB.
+      - name: Test DB Script Load
+        run: docker compose run backend python -c "import init_db; print('Init script is valid')"
