@@ -700,7 +700,10 @@
       let currentUser = null;
 
       // API Base URL
-      const API_URL = "http://localhost:5000/api";
+      const API_URL =
+        window.location.hostname === "localhost"
+          ? "http://localhost:5000/api"
+          : "/api";
 
       // Initialize on page load
       // Initialize on page load
