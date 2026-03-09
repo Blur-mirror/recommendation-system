@@ -1,26 +1,35 @@
 from flask import Blueprint, jsonify, request
 from db import get_connection
 
+#Create the Blueprint for books
 books_bp = Blueprint('books', __name__)
 
+#this code follows the same logic as movies.py for commented code please review movies.py
+
 def init_books_table():
-    """Asegura que las columnas necesarias existan en la DB"""
+    """Ensure that the necessary columns exist in the database"""
     try:
         conn = get_connection()
         cur = conn.cursor()
-        # Aseguramos que existan tanto thumbnail como description
+        # Add 'thumbnail' and 'description' columns if they do not already exist
+        # This prevents errors during subsequent runs (idempotent operation)
         cur.execute("ALTER TABLE books ADD COLUMN IF NOT EXISTS thumbnail TEXT;")
         cur.execute("ALTER TABLE books ADD COLUMN IF NOT EXISTS description TEXT;")
+        # Save the changes to the database
         conn.commit()
+        # Close communication with the database
         cur.close()
         conn.close()
     except Exception as e:
-        print(f"Nota: No se pudo verificar la estructura de la tabla: {e}")
+        # Handle potential errors (e.g., table 'books' doesn't exist yet)
+        print(f"Note: The table structure could not be verified: {e}")
 
+# Run the initialization
 init_books_table()
 
 @books_bp.route('/', methods=['GET'])
 def get_books():
+    """Get all books with optional filtering"""
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -29,7 +38,7 @@ def get_books():
         author = request.args.get('author')
         limit = request.args.get('limit', 20, type=int)
 
-        # 1. Agregamos 'description' al SELECT
+        # 1. We added 'description' to the SELECT
         query = "SELECT id, title, authors, rating, thumbnail, description FROM books WHERE thumbnail IS NOT NULL AND thumbnail != ''"
         params = []
 
@@ -55,7 +64,7 @@ def get_books():
                 "authors": book[2],
                 "rating": float(book[3]) if book[3] else 0,
                 "thumbnail": book[4],
-                "description": book[5]  # <--- 2. Enviamos la descripción al front
+                "description": book[5]  # <--- 2. We sent the description to the front.
             })
 
         cur.close()
@@ -67,11 +76,12 @@ def get_books():
 
 @books_bp.route('/<int:book_id>', methods=['GET'])
 def get_book(book_id):
+    """Get a single book by ID"""
     try:
         conn = get_connection()
         cur = conn.cursor()
 
-        # 3. SELECT actualizado con description
+        # 3. SELECT updated with description
         cur.execute("""
             SELECT id, title, authors, rating, thumbnail, description
             FROM books
@@ -91,7 +101,7 @@ def get_book(book_id):
             "authors": book[2],
             "rating": float(book[3]) if book[3] else 0,
             "thumbnail": book[4],
-            "description": book[5] # <--- 4. Enviamos descripción
+            "description": book[5] # <--- 4. We send description
         }), 200
 
     except Exception as e:
@@ -99,6 +109,7 @@ def get_book(book_id):
 
 @books_bp.route('/search', methods=['GET'])
 def search_books():
+    """Search books by title or author"""
     try:
         query_text = request.args.get('q', '')
 
@@ -108,7 +119,7 @@ def search_books():
         conn = get_connection()
         cur = conn.cursor()
 
-        # 5. Agregamos 'description' al SELECT de búsqueda
+        # 5. We added 'description' to the search SELECT.
         cur.execute("""
             SELECT id, title, authors, rating, thumbnail, description
             FROM books
@@ -126,7 +137,7 @@ def search_books():
                 "authors": book[2],
                 "rating": float(book[3]) if book[3] else 0,
                 "thumbnail": book[4],
-                "description": book[5] # <--- 6. Enviamos descripción
+                "description": book[5] # <--- 6. We send description
             })
 
         cur.close()

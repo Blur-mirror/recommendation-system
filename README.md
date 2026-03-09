@@ -431,3 +431,8 @@ Implementation of sign-in/out styles (`style.css`).
 - @Nikov280 - New Feature implementation
 
 ---
+
+All spanish documentation reverted to english, and more detailed explanation implemented.
+All spanish responses reverted to english.
+A stuck loading state fixed.
+A functional logo link implemented.
