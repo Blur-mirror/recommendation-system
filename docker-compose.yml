@@ -20,6 +20,11 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - recommender-network
+  healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     depends_on:
@@ -38,8 +43,6 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY} #include the JWT secret for user auth
     ports:
       - "5000:5000" #enables the port so we can use flask on it and get results from the requests.
-    depends_on:
-      - db #this ensures the flask won't start until the DB is ready to avoid crashes
     networks:
       - recommender-network #the bridge between flask and the database so they can communicate
     volumes:
