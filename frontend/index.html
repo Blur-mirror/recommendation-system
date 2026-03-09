@@ -1,1356 +1,156 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie & Book Recommender</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
 
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #121420 30%, #403f4c 100%);
-        min-height: 100vh;
-        padding: 20px;
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      header {
-        color: white;
-        margin-bottom: 40px;
-        padding-top: 60px;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-      }
-
-      .header-content {
-        text-align: center;
-      }
-
-      h1 {
-        font-size: 3rem;
-        margin-bottom: 10px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      }
-
-      .tagline {
-        font-size: 1.2rem;
-        opacity: 0.9;
-      }
-
-      /* User Profile Section */
-      .user-section {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        z-index: 100;
-      }
-
-      @media (max-width: 768px) {
-        .user-section {
-          position: relative;
-          top: auto;
-          right: auto;
-          justify-content: center;
-          margin-top: 10px;
-        }
-      }
-
-      .user-info {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 10px 20px;
-        border-radius: 25px;
-        color: rgb(255, 255, 255);
-        display: none;
-      }
-
-      .user-info.logged-in {
-        display: block;
-      }
-
-      .btn {
-        background: #c3f73a;
-        color: black;
-        border: none;
-        padding: 10px 25px;
-        border-radius: 25px;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 600;
-        transition: all 0.3s;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
-
-      .btn-logout {
-        background: #121420;
-        color: white;
-      }
-
-      .btn-logout:hover {
-        background: #2c2b3c;
-      }
-
-      /* Modal Styles */
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        animation: fadeIn 0.3s;
-      }
-
-      .modal.active {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      .modal-content {
-        background: white;
-        padding: 40px;
-        border-radius: 15px;
-        max-width: 400px;
-        width: 90%;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        animation: slideUp 0.3s;
-      }
-
-      @keyframes slideUp {
-        from {
-          transform: translateY(50px);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
-
-      .modal-header {
-        text-align: center;
-        margin-bottom: 30px;
-      }
-
-      .modal-header h2 {
-        color: #1b2432;
-        font-size: 2rem;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-      }
-
-      .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: #333;
-        font-weight: 600;
-      }
-
-      .form-group input {
-        width: 100%;
-        padding: 12px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: border 0.3s;
-      }
-
-      .form-group input:focus {
-        outline: none;
-        border-color: #182665;
-      }
-
-      .btn-primary {
-        width: 100%;
-        background: #c3f73a;
-        color: black;
-        padding: 15px;
-        font-size: 1.1rem;
-        margin-top: 10px;
-      }
-
-      .btn-primary:hover {
-        background: #a2cf31;
-      }
-
-      .modal-footer {
-        text-align: center;
-        margin-top: 20px;
-        color: #1b2432;
-      }
-
-      .modal-footer a {
-        color: #1b2432;
-        cursor: pointer;
-        text-decoration: underline;
-      }
-
-      .error-message {
-        background: #f44336;
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-        display: none;
-      }
-
-      .error-message.active {
-        display: block;
-      }
-
-      .success-message {
-        background: #4caf50;
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-        display: none;
-      }
-
-      .success-message.active {
-        display: block;
-      }
-
-      .tabs {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin-bottom: 30px;
-      }
-
-      .tab-btn {
-        background: #ececed;
-        border: none;
-        padding: 15px 40px;
-        font-size: 1.1rem;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .tab-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-      }
-
-      .tab-btn.active {
-        background: #1b2432;
-        color: white;
-      }
-
-      .search-box {
-        background: white;
-        padding: 20px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .search-input {
-        width: 100%;
-        padding: 15px;
-        font-size: 1rem;
-        border: 2px solid #ddd;
-        border-radius: 10px;
-        outline: none;
-        transition: border 0.3s;
-      }
-
-      .search-input:focus {
-        border-color: #667eea;
-      }
-
-      .filters {
-        display: flex;
-        gap: 15px;
-        margin-top: 15px;
-        flex-wrap: wrap;
-      }
-
-      .filter-group {
-        flex: 1;
-        min-width: 200px;
-      }
-
-      .filter-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-        color: #333;
-      }
-
-      .filter-group select,
-      .filter-group input {
-        width: 100%;
-        padding: 10px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 0.9rem;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 25px;
-        margin-bottom: 40px;
-      }
-
-      .card {
-        background: #1b2432;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      }
-
-      .card h3 {
-        color: white;
-        margin-bottom: 10px;
-        font-size: 1.2rem;
-        min-height: 60px;
-      }
-
-      .card-info {
-        color: white;
-        font-size: 0.9rem;
-        margin: 5px 0;
-      }
-
-      .rating {
-        display: inline-block;
-        background: #ffd700;
-        color: #333;
-        padding: 5px 12px;
-        border-radius: 10px;
-        font-weight: bold;
-        margin-top: 10px;
-      }
-
-      .rating.high {
-        background: #4caf50;
-        color: white;
-      }
-
-      .rating.medium {
-        background: #ff9800;
-        color: white;
-      }
-
-      .rating.low {
-        background: #f44336;
-        color: white;
-      }
-
-      .rating.no {
-        background: #7e7d7d;
-        color: white;
-      }
-
-      /* Star Rating Styles */
-      .rating-section {
-        border-top: 1px solid #eee;
-        padding-top: 15px;
-        margin-top: 10px;
-      }
-
-      .user-rating {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-      }
-
-      .star-rating {
-        display: flex;
-        gap: 5px;
-        font-size: 1.5rem;
-      }
-
-      .star {
-        cursor: pointer;
-        color: #ddd;
-        transition: all 0.2s;
-      }
-
-      .star.filled {
-        color: #ffd700;
-      }
-
-      .star:hover {
-        transform: scale(1.2);
-      }
-
-      .star.clickable:hover ~ .star {
-        color: #ddd;
-      }
-
-      .star.clickable:hover {
-        color: #ffd700;
-      }
-
-      .rating-info {
-        font-size: 0.85rem;
-        color: white;
-        margin-top: 5px;
-      }
-
-      .your-rating-badge {
-        display: inline-block;
-        background: #c3f73a;
-        color: black;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-      }
-
-      .login-prompt {
-        font-size: 0.85rem;
-        color: #c3f73a;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .login-prompt:hover {
-        text-decoration: underline;
-      }
-
-      .loading {
-        text-align: center;
-        color: white;
-        font-size: 1.5rem;
-        padding: 40px;
-      }
-
-      .error {
-        background: #f44336;
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        margin: 20px 0;
-      }
-
-      .stats {
-        background: #e3e4e5;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .stats span {
-        font-weight: bold;
-        color: #1b2432;
-        font-size: 1.2rem;
-      }
-
-      .rating-loading {
-        font-size: 0.85rem;
-        color: #999;
-        font-style: italic;
-      }
-
-      .rating-loading {
-        font-size: 0.85rem;
-        color: #999;
-        font-style: italic;
-      }
-
-      .recommendation-reason {
-        font-size: 0.85rem;
-        color: #e7f73a;
-        font-style: italic;
-        margin-top: 5px;
-        font-weight: 600;
-      }
-
-      .recommendation-type-badge {
-        display: inline-block;
-        background: #2da539;
-        color: white;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-bottom: 5px;
-      }
-
-      .popular {
-        display: inline-block;
-        background: #2da539;
-        color: white;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-bottom: 5px;
-      }
-
-      .no-recommendations {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        color: white;
-        padding: 40px;
-        min-height: 400px;
-        width: 100%;
-        margin: 0 auto;
-      }
-
-      .no-recommendations h2 {
-        font-size: 2rem;
-        margin-bottom: 20px;
-        width: 100%;
-      }
-
-      .no-recommendations p {
-        font-size: 1.2rem;
-        margin-bottom: 30px;
-        opacity: 0.9;
-        width: 100%;
-      }
-
-      .no-recommendations button {
-        background: #c3f73a;
-        color: black;
-        border: none;
-        padding: 15px 40px;
-        border-radius: 25px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-      }
-
-      .no-recommendations button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <div class="header-content">
-          <h1>Movie & Book Recommender</h1>
-          <p class="tagline">This is my last try. RIP</p>
-        </div>
-
-        <!-- User Section -->
-        <div class="user-section">
-          <div class="user-info" id="userInfo">
-            <span id="username"></span>
-          </div>
-          <button class="btn" id="loginBtn" onclick="showLoginModal()">
-            Login
-          </button>
-          <button
-            class="btn btn-logout"
-            id="logoutBtn"
-            onclick="logout()"
-            style="display: none"
-          >
-            Logout
-          </button>
-
-          <button
-            class="btn"
-            id="clearRatingsBtn"
-            onclick="clearAllRatings()"
-            style="display: none; background: #e35f4b; color: white"
-            title="Debug: Clear all your ratings"
-          >
-            Clear Ratings
-          </button>
-        </div>
-      </header>
-
-      <div class="tabs">
-        <button class="tab-btn" onclick="switchTab('recommendations')">
-          For You
-        </button>
-        <button class="tab-btn active" onclick="switchTab('movies')">
-          Movies
-        </button>
-        <button class="tab-btn" onclick="switchTab('books')">Books</button>
-      </div>
-
-      <div class="search-box">
-        <input
-          type="text"
-          id="searchInput"
-          class="search-input"
-          placeholder="Search for movies or books..."
-          onkeyup="handleSearch()"
-        />
-
-        <div class="filters" id="filters">
-          <!-- Filters will be injected here -->
-        </div>
-      </div>
-
-      <div class="stats" id="stats">Loading...</div>
-
-      <div class="grid" id="content">
-        <div class="loading">Loading...</div>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LitFlick | Movie & Book Recommender</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header class="main-header">
+    <div class="header-left">
+      <a href="#" class="logo-link">
+        <img src="favicon/icono.png" alt="LitFlick Logo" class="logo-img">
+      <h1 class="logo">LitFlick</h1>
+      </a>
     </div>
 
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 id="modalTitle">Login</h2>
+    <div class="header-center">
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search movies, books..." onkeyup="handleSearch()">
+        <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()">&times;</span>
+    </div>
+</div>
+
+    <div class="header-right">
+      <nav class="nav-links">
+        <a href="#" class="nav-item" onclick="switchTab('recommendations')">For You</a>
+        <a href="#" class="nav-item" onclick="switchTab('movies')">Movies</a>
+        <a href="#" class="nav-item" onclick="switchTab('books')">Books</a>
+      </nav>
+
+      <div class="auth-buttons">
+        <div class="user-info" id="userInfo">
+          <span id="username" style="margin-right: 10px; font-size: 0.9rem;"></span>
         </div>
-
-        <div class="error-message" id="authError"></div>
-        <div class="success-message" id="authSuccess"></div>
-
-        <form id="authForm" onsubmit="handleAuth(event)">
-          <div class="form-group" id="emailGroup" style="display: none">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email" />
-          </div>
-
-          <div class="form-group">
-            <label for="authUsername">Username</label>
-            <input
-              type="text"
-              id="authUsername"
-              placeholder="Enter your username"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="authPassword">Password</label>
-            <input
-              type="password"
-              id="authPassword"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-
-          <button type="submit" class="btn btn-primary" id="authSubmitBtn">
-            Login
-          </button>
-        </form>
-
-        <div class="modal-footer">
-          <span id="toggleAuthText"
-            >Don't have an account?
-            <a onclick="toggleAuthMode()">Register</a></span
-          >
-        </div>
+        <button class="btn-outline" id="loginBtn" onclick="showLoginModal()">Login</button>
+        <button class="btn-purple" id="registerBtn" onclick="showRegisterModal()">Register</button>
+        <button class="btn-outline" id="logoutBtn" onclick="logout()" style="display: none">Logout</button>
       </div>
     </div>
+  </header>
 
-    <script>
-      let currentTab = "movies";
-      let allData = [];
-      let isLoginMode = true;
-      let currentUser = null;
+  <div class="container">
+    <div class="hero-carousel" id="heroCarousel">
+      <button class="carousel-btn prev" onclick="moveCarousel(-1)">&#10094;</button>
+      <div class="carousel-container" id="carouselContainer"></div>
+      <button class="carousel-btn next" onclick="moveCarousel(1)">&#10095;</button>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
 
-      // API Base URL
-      const API_URL =
-        window.location.hostname === "localhost"
-          ? "http://localhost:5000/api"
-          : "/api";
+    <div id="stats" style="margin-bottom: 20px; opacity: 0.6; font-size: 0.9rem;"></div>
 
-      // Initialize on page load
-      // Initialize on page load
-      window.onload = async () => {
-        await checkAuth();
-        loadRecommendations(); // Now this waits for auth check
-      };
-
-      // Check if user is logged in
-      async function checkAuth() {
-        const token = localStorage.getItem("token");
-
-        if (token) {
-          try {
-            const res = await fetch(`${API_URL}/auth/verify`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            const data = await res.json();
-
-            if (data.valid) {
-              currentUser = data.user;
-              updateUIForLoggedInUser();
-            } else {
-              localStorage.removeItem("token");
-            }
-          } catch (err) {
-            console.error("Auth check failed:", err);
-            localStorage.removeItem("token");
-          }
-        }
-      }
-
-      // Update UI when user is logged in
-      function updateUIForLoggedInUser() {
-        document.getElementById("username").textContent = currentUser.username;
-        document.getElementById("userInfo").classList.add("logged-in");
-        document.getElementById("loginBtn").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "block";
-        document.getElementById("clearRatingsBtn").style.display = "block";
-      }
-
-      // Show login modal
-      function showLoginModal() {
-        document.getElementById("loginModal").classList.add("active");
-      }
-
-      // Close modal when clicking outside
-      window.onclick = function (event) {
-        const modal = document.getElementById("loginModal");
-        if (event.target === modal) {
-          modal.classList.remove("active");
-        }
-      };
-
-      // Toggle between login and register
-      function toggleAuthMode() {
-        isLoginMode = !isLoginMode;
-
-        const modalTitle = document.getElementById("modalTitle");
-        const emailGroup = document.getElementById("emailGroup");
-        const submitBtn = document.getElementById("authSubmitBtn");
-        const toggleText = document.getElementById("toggleAuthText");
-
-        if (isLoginMode) {
-          modalTitle.textContent = "Login";
-          emailGroup.style.display = "none";
-          submitBtn.textContent = "Login";
-          toggleText.innerHTML =
-            'Don\'t have an account? <a onclick="toggleAuthMode()">Register</a>';
-        } else {
-          modalTitle.textContent = "Register";
-          emailGroup.style.display = "block";
-          submitBtn.textContent = "Register";
-          toggleText.innerHTML =
-            'Already have an account? <a onclick="toggleAuthMode()">Login</a>';
-        }
-
-        document.getElementById("authError").classList.remove("active");
-        document.getElementById("authSuccess").classList.remove("active");
-      }
-
-      // Handle login/register
-      async function handleAuth(event) {
-        event.preventDefault();
-
-        const username = document.getElementById("authUsername").value;
-        const password = document.getElementById("authPassword").value;
-        const email = document.getElementById("email").value;
-
-        const errorDiv = document.getElementById("authError");
-        const successDiv = document.getElementById("authSuccess");
-
-        errorDiv.classList.remove("active");
-        successDiv.classList.remove("active");
-
-        const endpoint = isLoginMode ? "/auth/login" : "/auth/register";
-        const payload = isLoginMode
-          ? { username, password }
-          : { username, email, password };
-
-        try {
-          const response = await fetch(`${API_URL}${endpoint}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            localStorage.setItem("token", data.token);
-            currentUser = data.user;
-
-            successDiv.textContent = data.message;
-            successDiv.classList.add("active");
-
-            updateUIForLoggedInUser();
-
-            setTimeout(() => {
-              document.getElementById("loginModal").classList.remove("active");
-              document.getElementById("authForm").reset();
-              loadData(currentTab); // Reload to show rating options
-            }, 1000);
-          } else {
-            errorDiv.textContent = data.error || "An error occurred";
-            errorDiv.classList.add("active");
-          }
-        } catch (error) {
-          errorDiv.textContent = "Network error. Please try again.";
-          errorDiv.classList.add("active");
-        }
-      }
-
-      // Logout
-      function logout() {
-        localStorage.removeItem("token");
-        currentUser = null;
-
-        document.getElementById("userInfo").classList.remove("logged-in");
-        document.getElementById("loginBtn").style.display = "block";
-        document.getElementById("logoutBtn").style.display = "none";
-        document.getElementById("clearRatingsBtn").style.display = "none";
-
-        // Handle logout based on current tab
-        if (currentTab === "recommendations") {
-          loadRecommendations(); // Show "login to see recommendations" message
-        } else {
-          loadData(currentTab); // Reload movies/books without ratings
-        }
-
-        alert("Logged out successfully!");
-      }
-
-      // Switch between Movies, Books, and Recommendations
-      function switchTab(tab) {
-        currentTab = tab;
-
-        document.querySelectorAll(".tab-btn").forEach((btn) => {
-          btn.classList.remove("active");
-        });
-        event.target.classList.add("active");
-
-        document.getElementById("searchInput").value = "";
-
-        if (tab === "recommendations") {
-          loadRecommendations();
-        } else {
-          loadData(tab);
-        }
-      }
-
-      // Load recommendations
-      async function loadRecommendations() {
-        const contentDiv = document.getElementById("content");
-        const statsDiv = document.getElementById("stats");
-        const searchBox = document.querySelector(".search-box");
-
-        // Hide search box for recommendations
-        searchBox.style.display = "none";
-
-        if (!currentUser) {
-          contentDiv.style.display = "block";
-          contentDiv.innerHTML = `
-  <div class="no-recommendations">
-    <h2> Get Personalized Recommendations!</h2>
-    <p>Login to see movies and books picked just for you</p>
-    <button onclick="showLoginModal()">Login Now</button>
+    <div class="grid" id="content">
+      <div class="loading">Loading content...</div>
+    </div>
   </div>
-`;
-          statsDiv.style.display = "none";
-          return;
-        }
 
-        try {
-          contentDiv.innerHTML =
-            '<div class="loading">Loading your recommendations...</div>';
-          statsDiv.style.display = "block";
-          statsDiv.innerHTML = "Analyzing your taste...";
+  <div class="modal" id="loginModal">
+    <div class="modal-content" style="position: relative;">
+      <span onclick="closeModal()"
+        style="position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 1.5rem; opacity: 0.5;">&times;</span>
 
-          const token = localStorage.getItem("token");
-
-          // Fetch movie recommendations
-          const movieResponse = await fetch(
-            `${API_URL}/recommendations/movies`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          );
-
-          // Fetch book recommendations
-          const bookResponse = await fetch(`${API_URL}/recommendations/books`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (!movieResponse.ok || !bookResponse.ok) {
-            throw new Error("Failed to load recommendations");
-          }
-
-          const movieData = await movieResponse.json();
-          const bookData = await bookResponse.json();
-
-          const allRecommendations = [
-            ...movieData.recommendations.map((r) => ({
-              ...r,
-              content_type: "movies",
-            })),
-            ...bookData.recommendations.map((r) => ({
-              ...r,
-              content_type: "books",
-            })),
-          ];
-
-          if (allRecommendations.length === 0) {
-            contentDiv.style.display = "block";
-            contentDiv.innerHTML = `
-        <div class="no-recommendations">
-          <h2> Not Enough Data Yet</h2>
-          <p>Rate at least 3 movies or books to get personalized recommendations!</p>
-          <button onclick="switchTab('movies')">Start Rating Movies</button>
+      <h2 id="modalTitle" style="margin-bottom: 20px;">Welcome</h2>
+      <form id="authForm" onsubmit="handleAuth(event)">
+        <div id="emailGroup" class="hidden" style="margin-bottom: 15px;">
+          <input type="email" id="email" placeholder="Email"
+            style="width:100%; padding:10px; background:#0f1014; border:1px solid #333; color:white; border-radius:5px;">
         </div>
-      `;
-            statsDiv.innerHTML =
-              "Rate more items to get better recommendations";
-            return;
-          }
+        <input type="text" id="authUsername" placeholder="Username" required
+          style="width:100%; padding:10px; margin-bottom:15px; background:#0f1014; border:1px solid #333; color:white; border-radius:5px;">
+        <input type="password" id="authPassword" placeholder="Password" required
+          style="width:100%; padding:10px; margin-bottom:15px; background:#0f1014; border:1px solid #333; color:white; border-radius:5px;">
+        <button type="submit" class="btn-purple" style="width: 100%; padding: 12px;">Continue</button>
+      </form>
+      <p style="text-align:center; margin-top:15px; font-size:0.8rem;">
+        <a onclick="toggleAuthMode()" style="color:#a855f7; cursor:pointer;">Switch Login/Register</a>
+      </p>
+    </div>
+  </div>
 
-          statsDiv.innerHTML = `<span>${allRecommendations.length}</span> personalized recommendations for you`;
+  <footer class="site-footer">
+    <div class="footer-container">
 
-          // Render recommendations
-          const html = allRecommendations
-            .map((item) => {
-              if (item.content_type === "movies") {
-                return createRecommendationCard(item, "movie");
-              } else {
-                return createRecommendationCard(item, "book");
-              }
-            })
-            .join("");
-
-          contentDiv.style.display = "grid"; // Set back to grid
-          contentDiv.innerHTML = html;
-        } catch (error) {
-          console.error("Error loading recommendations:", error);
-          contentDiv.innerHTML = `
-      <div class="error">
-         Error loading recommendations<br>
-        <small>${error.message}</small>
+      <div class="footer-col">
+        <div class="header-left">
+      <a href="#" class="logo-link">
+        <img src="favicon/icono.png" alt="LitFlick Logo" class="logo-img">
+      <h1 class="logo">LitFlick</h1>
+      </a>
       </div>
-    `;
-        }
-      }
-      // Load data from API
-      async function loadData(type) {
-        const contentDiv = document.getElementById("content");
-        const statsDiv = document.getElementById("stats");
-        const searchBox = document.querySelector(".search-box");
+        <p class="footer-desc">
+          Your ultimate destination to discover, rate, and organize the best stories, whether on the big
+          screen or on paper.
+        </p>
+        <div class="social-icons">
+          <a href="#" class="social-link">Instagram</a>
+          <a href="#" class="social-link">Twitter/X</a>
+          <a href="#" class="social-link">Discord</a>
+        </div>
+      </div>
 
-        // Show search box for movies/books
-        searchBox.style.display = "block";
-        statsDiv.style.display = "block";
+      <div class="footer-col">
+        <h3>Explore</h3>
+        <ul class="footer-links">
+          <li><a href="javascript:void(0)" onclick="switchTab('recommendations')">For You</a></li>
+          <li><a href="javascript:void(0)" onclick="switchTab('movies')">Movies</a></li>
+          <li><a href="javascript:void(0)" onclick="switchTab('books')">Books</a></li>
+          <li><a href="#">Curated Lists</a></li>
+        </ul>
+      </div>
 
-        try {
-          contentDiv.innerHTML = '<div class="loading">Loading...</div>';
+      <div class="footer-col">
+        <h3>Legal</h3>
+        <ul class="footer-links">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+          <li><a href="#">Contact / Help</a></li>
+        </ul>
+      </div>
 
-          const response = await fetch(`${API_URL}/${type}/`);
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          allData = data[type] || [];
-
-          statsDiv.innerHTML = `Found <span>${allData.length}</span> ${type}`;
-
-          renderFilters(type);
-          await renderContentWithRatings(allData, type);
-        } catch (error) {
-          console.error("Error loading data:", error);
-          contentDiv.innerHTML = `
-                    <div class="error">
-                        ❌ Error loading ${type}. Make sure the API is running!<br>
-                        <small>${error.message}</small>
-                    </div>
-                `;
-        }
-      }
-
-      // Render content with ratings
-      async function renderContentWithRatings(data, type) {
-        const contentDiv = document.getElementById("content");
-
-        if (data.length === 0) {
-          contentDiv.innerHTML = '<div class="loading">No results found</div>';
-          return;
-        }
-
-        // First render cards without ratings
-        const html = data
-          .map((item) => {
-            if (type === "movies") {
-              return createMovieCard(item);
-            } else {
-              return createBookCard(item);
-            }
-          })
-          .join("");
-
-        contentDiv.innerHTML = html;
-
-        // Then load ratings for each item
-        for (let item of data) {
-          await loadRatingForItem(type, item.id);
-        }
-      }
-
-      // Load rating for a specific item
-      async function loadRatingForItem(contentType, contentId) {
-        try {
-          const headers = {};
-          const token = localStorage.getItem("token");
-
-          if (token) {
-            headers["Authorization"] = `Bearer ${token}`;
-          }
-
-          const response = await fetch(
-            `${API_URL}/ratings/${contentType}/${contentId}`,
-            {
-              headers: headers,
-            },
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            updateCardWithRating(contentType, contentId, data);
-          }
-        } catch (error) {
-          console.error("Error loading rating:", error);
-        }
-      }
-
-      // Update card with rating data
-      function updateCardWithRating(contentType, contentId, ratingData) {
-        const cardRatingDiv = document.getElementById(
-          `rating-${contentType}-${contentId}`,
-        );
-
-        if (!cardRatingDiv) return;
-
-        const { average_rating, total_ratings, your_rating } = ratingData;
-
-        let html = "";
-
-        if (currentUser) {
-          // User is logged in - show interactive stars
-          html += '<div class="user-rating">';
-          html +=
-            '<div class="star-rating" id="stars-' +
-            contentType +
-            "-" +
-            contentId +
-            '">';
-
-          for (let i = 1; i <= 5; i++) {
-            const filled = your_rating && i <= your_rating ? "filled" : "";
-            html += `<span class="star clickable ${filled}" onclick="rateItem('${contentType}', ${contentId}, ${i})">★</span>`;
-          }
-
-          html += "</div>";
-
-          if (your_rating) {
-            html += `<span class="your-rating-badge">Your rating: ${your_rating}/5</span>`;
-          }
-
-          html += "</div>";
-        } else {
-          // User not logged in
-          html +=
-            '<div class="login-prompt" onclick="showLoginModal()">Login to rate</div>';
-        }
-
-        // Show average rating
-        if (total_ratings > 0) {
-          html += `<div class="rating-info">Average: ${average_rating}/5 (${total_ratings} ${total_ratings === 1 ? "rating" : "ratings"})</div>`;
-        } else {
-          html +=
-            '<div class="rating-info">No ratings yet. Be the first!</div>';
-        }
-
-        cardRatingDiv.innerHTML = html;
-      }
-
-      // Rate an item
-      async function rateItem(contentType, contentId, rating) {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          showLoginModal();
-          return;
-        }
-
-        try {
-          const response = await fetch(
-            `${API_URL}/ratings/${contentType}/${contentId}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ rating }),
-            },
-          );
-
-          const data = await response.json();
-
-          if (response.ok) {
-            // Update the card with new rating data
-            updateCardWithRating(contentType, contentId, {
-              average_rating: data.average_rating,
-              total_ratings: data.total_ratings,
-              your_rating: data.your_rating,
-            });
-          } else {
-            alert("Error: " + data.error);
-          }
-        } catch (error) {
-          console.error("Error rating item:", error);
-          alert("Failed to submit rating. Please try again.");
-        }
-      }
-
-      // Render filters
-      function renderFilters(type) {
-        const filtersDiv = document.getElementById("filters");
-
-        if (type === "movies") {
-          filtersDiv.innerHTML = `
-                    <div class="filter-group">
-                        <label>Minimum Rating</label>
-                        <select id="minRating" onchange="applyFilters()">
-                            <option value="0">All Ratings</option>
-                            <option value="5">5.0+</option>
-                            <option value="6">6.0+</option>
-                            <option value="7">7.0+</option>
-                            <option value="8">8.0+</option>
-                            <option value="9">9.0+</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Release Year</label>
-                        <select id="yearFilter" onchange="applyFilters()">
-                            <option value="">All Years</option>
-                            <option value="2026">2026</option>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                        </select>
-                    </div>
-                `;
-        } else {
-          filtersDiv.innerHTML = `
-                    <div class="filter-group">
-                        <label>Minimum Rating</label>
-                        <select id="minRating" onchange="applyFilters()">
-                            <option value="0">All Ratings</option>
-                            <option value="3">3.0+</option>
-                            <option value="4">4.0+</option>
-                            <option value="4.5">4.5+</option>
-                        </select>
-                    </div>
-                `;
-        }
-      }
-
-      // Apply filters
-      function applyFilters() {
-        const minRating = parseFloat(
-          document.getElementById("minRating")?.value || 0,
-        );
-        const yearFilter = document.getElementById("yearFilter")?.value;
-
-        let filtered = allData.filter((item) => {
-          if (item.rating < minRating) return false;
-          if (
-            yearFilter &&
-            currentTab === "movies" &&
-            item.release_year != yearFilter
-          )
-            return false;
-          return true;
-        });
-
-        renderContentWithRatings(filtered, currentTab);
-      }
-
-      // Search handler
-      function handleSearch() {
-        const query = document
-          .getElementById("searchInput")
-          .value.toLowerCase();
-
-        if (query.length === 0) {
-          applyFilters();
-          return;
-        }
-
-        const filtered = allData.filter((item) => {
-          if (currentTab === "movies") {
-            return item.title.toLowerCase().includes(query);
-          } else {
-            return (
-              item.title.toLowerCase().includes(query) ||
-              item.authors.toLowerCase().includes(query)
-            );
-          }
-        });
-
-        renderContentWithRatings(filtered, currentTab);
-      }
-
-      // Create movie card
-      function createMovieCard(movie) {
-        const ratingClass =
-          movie.rating >= 8 ? "high" : movie.rating >= 6 ? "medium" : "low";
-
-        return `
-                <div class="card">
-                    <h3>${movie.title}</h3>
-                    <p class="card-info">Year: ${movie.release_year || "N/A"}</p>
-                    <span class="rating ${ratingClass}">⭐ ${movie.rating.toFixed(1)}</span>
-                    <div class="rating-section">
-                        <div id="rating-movies-${movie.id}" class="rating-loading">Loading ratings...</div>
-                    </div>
-                </div>
-            `;
-      }
-
-      // Create book card
-      function createBookCard(book) {
-        const ratingClass =
-          book.rating >= 4 ? "high" : book.rating >= 3 ? "medium" : "low";
-        const ratingDisplay =
-          book.rating > 0 ? book.rating.toFixed(1) : "No rating";
-
-        return `
-                <div class="card">
-                    <h3>${book.title}</h3>
-                    <p class="card-info">Author: ${book.authors}</p>
-                    ${book.rating > 0 ? `<span class="rating ${ratingClass}">⭐ ${ratingDisplay}</span>` : '<span class="rating no">No rating</span>'}
-                    <div class="rating-section">
-                        <div id="rating-books-${book.id}" class="rating-loading">Loading ratings...</div>
-                    </div>
-                </div>
-            `;
-      }
-
-      // Create recommendation card
-      function createRecommendationCard(item, type) {
-        const isMovie = type === "movie";
-        const ratingClass =
-          item.rating >= (isMovie ? 8 : 4)
-            ? "high"
-            : item.rating >= (isMovie ? 6 : 3)
-              ? "medium"
-              : "low";
-
-        return `
-    <div class="card">
-      <span class="recommendation-type-badge">${item.recommendation_type.replace("_", " ").toUpperCase()}</span>
-      <h3>${item.title}</h3>
-      <p class="card-info">${isMovie ? "Year:" : "Author:"} ${isMovie ? item.release_year || "N/A" : item.authors}</p>
+      <div class="footer-col newsletter-col">
+        <h3>Stay Updated</h3>
+        <p>Get the best weekly recommendations sent to your inbox.</p>
+        <form class="newsletter-form">
+          <input type="email" placeholder="Your email address">
+          <button type="button">Subscribe</button>
+        </form>
+      </div>
 
     </div>
-  `;
-      }
 
-      //DEBUG ONLYYY!!!
+    <div class="footer-bottom">
+      <p>&copy; 2026 LitFlick Inc. All rights reserved.</p>
+    </div>
+  </footer>
 
-      // Clear all user ratings (DEBUG ONLY)
-      async function clearAllRatings() {
-        if (
-          !confirm(
-            "⚠️ This will DELETE ALL your ratings! Are you sure? (This is for testing only)",
-          )
-        ) {
-          return;
-        }
+  <script src="script.js"></script>
 
-        const token = localStorage.getItem("token");
-        if (!token) return;
+  <div id="logoutModal" class="modal">
+    <div class="modal-content logout-modal-box">
+        <div class="modal-icon">⚠️</div>
+        <h2>Sign Out</h2>
+        <p>Are you sure you want to log out of LitFlick?</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+            <button class="btn-confirm-logout" onclick="confirmLogout()">Logout</button>
+        </div>
+    </div>
+</div>
 
-        try {
-          // Get all user's ratings from database
-          const response = await fetch(`${API_URL}/ratings/clear-all`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+</body>
 
-          if (response.ok) {
-            alert("✅ All ratings cleared! Refresh to see changes.");
-
-            // Reload current view
-            if (currentTab === "recommendations") {
-              loadRecommendations();
-            } else {
-              loadData(currentTab);
-            }
-          } else {
-            const data = await response.json();
-            alert("Error: " + data.error);
-          }
-        } catch (error) {
-          console.error("Error clearing ratings:", error);
-          alert("Failed to clear ratings. Check console.");
-        }
-      }
-    </script>
-  </body>
 </html>
