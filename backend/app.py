@@ -1,5 +1,8 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+from flask_limiter import Limiter # For rate limiting
+from flask_limiter.util import get_remote_address # For rate limiting
+from flasgger import Swagger # For API documentation
 # Importing the 'Blueprints' (the separate logic for movies and books) from the routes directory
 from routes.movies import movies_bp
 from routes.books import books_bp
@@ -16,6 +19,7 @@ app = Flask(__name__)
 # without being blocked by browser security rules.
 CORS(app)
 bcrypt = Bcrypt(app)
+swagger = Swagger(app)
 
 # Register blueprints
 # This means that Any URL starting with /api/movies should be handled by movies_bp, which was already imported from routes.
@@ -28,10 +32,37 @@ app.register_blueprint(recommendations_bp, url_prefix='/api/recommendations')
 app.register_blueprint(profile_bp, url_prefix='/api/profile') # profile blueprint for user-specific routes
 app.register_blueprint(admin_bp, url_prefix='/api/admin') # admin blueprint for admin-specific routes
 
-#Checking the status of the API to make sure everything is good, "healthy", this is just for testing purposes.
+# A simple health check endpoint to verify the server is running and can connect to the database
 @app.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({"status": "healthy", "message": "API is running"}), 200
+def health():
+    """Comprehensive health check"""
+    health_status = {
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'checks': {}
+    }
+
+    # Check database connectivity
+    try:
+        conn = get_connection()
+        conn.cursor().execute('SELECT 1')
+        health_status['checks']['database'] = 'ok'
+    except Exception as e:
+        health_status['status'] = 'unhealthy'
+        health_status['checks']['database'] = f'error: {str(e)}'
+
+    # Check disk space
+    import shutil
+    total, used, free = shutil.disk_usage('/')
+    if free < 1_000_000_000:  # Less than 1GB
+        health_status['status'] = 'degraded'
+        health_status['checks']['disk'] = f'low: {free / 1_000_000_000:.2f}GB'
+    else:
+        health_status['checks']['disk'] = 'ok'
+
+    status_code = 200 if health_status['status'] == 'healthy' else 503
+    return jsonify(health_status), status_code
+
 
 #The welcome page that shows a list of available paths (endpoints)
 @app.route('/', methods=['GET'])
@@ -47,6 +78,13 @@ def home():
             "health": "/health"
         }
     }), 200
+
+limiter = Limiter(
+    app=app,
+    key_func-get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
 
 # This starts the server
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ import datetime
 import os
 from db import get_connection
 from flask_bcrypt import Bcrypt
+from app import limiter
 
 # Define the "Authentication Wing" of our API
 auth_bp = Blueprint('auth', __name__)
@@ -13,6 +14,7 @@ bcrypt = Bcrypt()
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "fallback-secret-key")
 
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit("3 per hour")  # Prevent spam accounts
 def register():
     """Register a new user"""
     try:
@@ -79,6 +81,7 @@ def register():
         return jsonify({"error": str(e)}), 500
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit("5 per minute")  # Prevent brute force login!
 def login():
     """Login user and return JWT token"""
     try:
