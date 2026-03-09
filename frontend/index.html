@@ -580,7 +580,7 @@
       <header>
         <div class="header-content">
           <h1>Movie & Book Recommender</h1>
-          <p class="tagline">Discover your next favorite movie or book</p>
+          <p class="tagline">This is my last try. RIP</p>
         </div>
 
         <!-- User Section -->
@@ -700,7 +700,10 @@
       let currentUser = null;
 
       // API Base URL
-      const API_URL = "http://localhost:5000/api";
+      const API_URL =
+        window.location.hostname === "localhost"
+          ? "http://localhost:5000/api"
+          : "/api";
 
       // Initialize on page load
       // Initialize on page load
