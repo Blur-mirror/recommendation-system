@@ -12,6 +12,8 @@ from routes.auth import auth_bp
 from routes.ratings import ratings_bp  # new routes for user ratings
 from routes.recommendations import recommendations_bp  # recommendation routes
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from db import get_connection
 from routes.profile import profile_bp
 from routes.admin import admin_bp
 
@@ -19,7 +21,7 @@ from routes.admin import admin_bp
 app = Flask(__name__)
 # CORS allows the frontend to talk to this backend
 # without being blocked by browser security rules.
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 bcrypt = Bcrypt(app)
 swagger = Swagger(app)
 limiter.init_app(app)
@@ -83,5 +85,29 @@ def home():
     }), 200
 
 # This starts the server
+
+def init_db_extras():
+    
+    try:
+        # Establish connection with the database
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        # Add the 'avatar_url' column to the users table if it's missing
+        # This allows storing links to profile pictures
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;")
+        # Save changes permanently
+        conn.commit()
+        # Clean up: close cursor and connection
+        cur.close()
+        conn.close()
+        # Success feedback for the developer
+        print("✅ Database verified and ready.")
+    except Exception as e:
+        # If something goes wrong (e.g., table 'users' doesn't exist), log it
+        print(f"ℹ️ Info DB: {e}")
+
 if __name__ == '__main__':
+    init_db_extras()  
+    
     app.run(host='0.0.0.0', port=5000, debug=True)

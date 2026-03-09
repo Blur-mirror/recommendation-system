@@ -1,9 +1,31 @@
 from flask import Blueprint, jsonify, request
 from db import get_connection
 
+#Create the Blueprint for books
 books_bp = Blueprint('books', __name__)
 
 #this code follows the same logic as movies.py for commented code please review movies.py
+
+def init_books_table():
+    """Ensure that the necessary columns exist in the database"""
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        # Add 'thumbnail' and 'description' columns if they do not already exist
+        # This prevents errors during subsequent runs (idempotent operation)
+        cur.execute("ALTER TABLE books ADD COLUMN IF NOT EXISTS thumbnail TEXT;")
+        cur.execute("ALTER TABLE books ADD COLUMN IF NOT EXISTS description TEXT;")
+        # Save the changes to the database
+        conn.commit()
+        # Close communication with the database
+        cur.close()
+        conn.close()
+    except Exception as e:
+        # Handle potential errors (e.g., table 'books' doesn't exist yet)
+        print(f"Note: The table structure could not be verified: {e}")
+
+# Run the initialization
+init_books_table()
 
 @books_bp.route('/', methods=['GET'])
 def get_books():
@@ -16,7 +38,8 @@ def get_books():
         author = request.args.get('author')
         limit = request.args.get('limit', 20, type=int)
 
-        query = "SELECT id, title, authors, rating FROM books WHERE 1=1"
+        # 1. We added 'description' to the SELECT
+        query = "SELECT id, title, authors, rating, thumbnail, description FROM books WHERE thumbnail IS NOT NULL AND thumbnail != ''"
         params = []
 
         if min_rating:
@@ -39,12 +62,13 @@ def get_books():
                 "id": book[0],
                 "title": book[1],
                 "authors": book[2],
-                "rating": float(book[3]) if book[3] else 0
+                "rating": float(book[3]) if book[3] else 0,
+                "thumbnail": book[4],
+                "description": book[5]  # <--- 2. We sent the description to the front.
             })
 
         cur.close()
         conn.close()
-
         return jsonify({"books": result, "count": len(result)}), 200
 
     except Exception as e:
@@ -57,8 +81,9 @@ def get_book(book_id):
         conn = get_connection()
         cur = conn.cursor()
 
+        # 3. SELECT updated with description
         cur.execute("""
-            SELECT id, title, authors, rating
+            SELECT id, title, authors, rating, thumbnail, description
             FROM books
             WHERE id = %s
         """, (book_id,))
@@ -74,7 +99,9 @@ def get_book(book_id):
             "id": book[0],
             "title": book[1],
             "authors": book[2],
-            "rating": float(book[3]) if book[3] else 0
+            "rating": float(book[3]) if book[3] else 0,
+            "thumbnail": book[4],
+            "description": book[5] # <--- 4. We send description
         }), 200
 
     except Exception as e:
@@ -92,8 +119,9 @@ def search_books():
         conn = get_connection()
         cur = conn.cursor()
 
+        # 5. We added 'description' to the search SELECT.
         cur.execute("""
-            SELECT id, title, authors, rating
+            SELECT id, title, authors, rating, thumbnail, description
             FROM books
             WHERE title ILIKE %s OR authors ILIKE %s
             ORDER BY rating DESC
@@ -107,7 +135,9 @@ def search_books():
                 "id": book[0],
                 "title": book[1],
                 "authors": book[2],
-                "rating": float(book[3]) if book[3] else 0
+                "rating": float(book[3]) if book[3] else 0,
+                "thumbnail": book[4],
+                "description": book[5] # <--- 6. We send description
             })
 
         cur.close()
