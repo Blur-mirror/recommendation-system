@@ -56,11 +56,26 @@ jobs:
         run: |
           docker compose up -d
           sleep 15
-
-      #Health check
-      - name: health check backend
+      #Wait for the backend to be healthy before proceeding with tests
+      - name: Wait for backend
         run: |
-          curl --fail http://localhost:5000/health || exit 1
+          for i in {1..20}; do
+            if curl -f http://localhost:5000/health; then
+              echo "Backend is healthy!"
+              exit 0
+            fi
+            echo "Waiting for backend..."
+            sleep 5
+          done
+
+          echo "Backend failed to start"
+          docker compose logs
+          exit 1
+        #This loop will wait up to 100 seconds for the backend to become healthy before proceeding.
+
+        #Show logs for debugging if the backend doesn't become healthy
+      - name: Show container logs
+        run: docker compose logs
 
       - name: health check frontend
         run: |

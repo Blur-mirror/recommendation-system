@@ -4,6 +4,11 @@ services:
   #This is the database and instructions for docker to eventually store the calls so we don't use too many requests.
   db:
     image: postgres:15
+    healthcheck: #trying to ensure the DB is ready before flask starts, this should help with the connection issues.
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recommender"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     container_name: recommender_db
     environment:
       POSTGRES_DB: recommender
@@ -17,6 +22,10 @@ services:
       - recommender-network
 
   backend:
+    depends_on:
+      db:
+        condition: service_healthy
+
     #This is the backend (FLASK)
     build: ./backend #this looks for the Dockerfile with instructions for the build
     container_name: recommender_backend
