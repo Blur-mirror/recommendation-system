@@ -9,8 +9,6 @@ from routes.recommendations import recommendations_bp  # recommendation routes
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from db import get_connection
-from routes.admin import admin_bp
-from routes.profile import profile_bp
 
 app = Flask(__name__)
 # CORS allows the frontend to talk to this backend
@@ -26,8 +24,6 @@ app.register_blueprint(books_bp, url_prefix='/api/books')
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(ratings_bp, url_prefix='/api/ratings')  # rating blueprint
 app.register_blueprint(recommendations_bp, url_prefix='/api/recommendations')
-app.register_blueprint(admin_bp, url_prefix='/api/admin')#admin blueprint for admin-specific routes
-app.register_blueprint(profile_bp, url_prefix='/api/profile') #profile blueprint for user profile management
 
 #Checking the status of the API to make sure everything is good, "healthy", this is just for testing purposes.
 @app.route('/health', methods=['GET'])
@@ -44,29 +40,35 @@ def home():
             "books": "/api/books",
             "auth": "/api/auth",
             "ratings": "/api/ratings",
-            "recommendations": "/api/recommendations",
+            "recommendations": "/api/recommendations", 
             "health": "/health"
         }
     }), 200
 
-
-
+# This starts the server
 
 def init_db_extras():
-
+    
     try:
+        # Establish connection with the database
         conn = get_connection()
         cur = conn.cursor()
-
+        
+        # Add the 'avatar_url' column to the users table if it's missing
+        # This allows storing links to profile pictures
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;")
+        # Save changes permanently
         conn.commit()
+        # Clean up: close cursor and connection
         cur.close()
         conn.close()
-        print("✅ Base de datos verificada y lista.")
+        # Success feedback for the developer
+        print("✅ Database verified and ready.")
     except Exception as e:
+        # If something goes wrong (e.g., table 'users' doesn't exist), log it
         print(f"ℹ️ Info DB: {e}")
 
 if __name__ == '__main__':
-    init_db_extras()
-
+    init_db_extras()  
+    
     app.run(host='0.0.0.0', port=5000, debug=True)
