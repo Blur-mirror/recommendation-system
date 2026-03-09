@@ -7,3 +7,4 @@ PyJWT
 flask-bcrypt
 pytest==7.4.3
 Flask-Limiter==3.5.0
+flasgger

@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   #This is the database and instructions for docker to eventually store the calls so we don't use too many requests.
   db:
