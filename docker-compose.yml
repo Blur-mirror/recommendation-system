@@ -1,9 +1,12 @@
-version: "3.8"
-
 services:
   #This is the database and instructions for docker to eventually store the calls so we don't use too many requests.
   db:
     image: postgres:15
+    healthcheck: #trying to ensure the DB is ready before flask starts, this should help with the connection issues.
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recommender"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     container_name: recommender_db
     environment:
       POSTGRES_DB: recommender
@@ -15,8 +18,11 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - recommender-network
-
   backend:
+    depends_on:
+      db:
+        condition: service_healthy
+
     #This is the backend (FLASK)
     build: ./backend #this looks for the Dockerfile with instructions for the build
     container_name: recommender_backend
@@ -29,8 +35,6 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY} #include the JWT secret for user auth
     ports:
       - "5000:5000" #enables the port so we can use flask on it and get results from the requests.
-    depends_on:
-      - db #this ensures the flask won't start until the DB is ready to avoid crashes
     networks:
       - recommender-network #the bridge between flask and the database so they can communicate
     volumes:

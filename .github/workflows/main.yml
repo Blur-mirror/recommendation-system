@@ -1,22 +1,44 @@
-name: Docker Build Check
+name: CI Pipeline
 
 on:
+  push:
+    branches: [Main, dev, feature/*]
   pull_request:
-    branches: [dev]
+    branches: [Main, dev, feature/*]
 
 jobs:
   test-build:
     runs-on: ubuntu-latest
     steps:
-      # 1. Pull the code from your repo onto the GitHub machine
-      - uses: actions/checkout@v3
+      #Check the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      # 2. Check for Python syntax errors in the backend code
+        #Set up python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      #Check for Python syntax errors in the backend code
       - name: Python Syntax Check
         run: |
-          python3 -m py_compile backend/*.py backend/routes/*.py
+          python -m py_compile backend/*.py
+          python -m py_compile backend/routes/*.py
 
-      # 3. Create a dummy .env file so Docker Compose doesn't crash
+      # Intall dependencies
+      - name: Install Dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      #Lint code
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          flake8 backend/ --count --max-line-length=120 --statistics || true
+
+      #Create a dummy .env
       - name: Setup Environment
         run: |
           touch .env
@@ -25,11 +47,47 @@ jobs:
           echo "GOOGLE_BOOKS_KEY=dummy_key" >> .env
           echo "JWT_SECRET_KEY=dummy_key" >> .env
 
-      # 4. Try to build the Docker containers
+      #Build docker containers
       - name: Build Docker Containers
         run: docker compose build
 
-      # 5. Run a "Smoke Test" on the DB script
-      # Note: This will check if the script is RUNNABLE, even without a real DB.
-      - name: Test DB Script Load
-        run: docker compose run backend python -c "import init_db; print('Init script is valid')"
+      #Start containers
+      - name: Start Containers
+        run: |
+          docker compose up -d
+          sleep 15
+      #Wait for the backend to be healthy before proceeding with tests
+      - name: Wait for backend
+        run: |
+          for i in {1..20}; do
+            if curl -f http://localhost:5000/health; then
+              echo "Backend is healthy!"
+              exit 0
+            fi
+            echo "Waiting for backend..."
+            sleep 5
+          done
+
+          echo "Backend failed to start"
+          docker compose logs
+          exit 1
+        #This loop will wait up to 100 seconds for the backend to become healthy before proceeding.
+
+        #Show logs for debugging if the backend doesn't become healthy
+      - name: Show container logs
+        run: docker compose logs
+
+      - name: health check frontend
+        run: |
+          curl --fail http://localhost:8080 || exit 1
+
+      - name: Run unit tests
+        run: |
+          cd backend
+          pip install pytest
+          pytest tests/ -v
+
+      #Clean up
+      - name: Stop Containers
+        if: always()
+        run: docker compose down
