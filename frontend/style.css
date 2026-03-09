@@ -1,3 +1,8 @@
+::selection {
+    background: #a855f7; /* Color de fondo al resaltar */
+    color: white;        /* Color del texto al resaltar */
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -59,17 +64,22 @@ body {
 .search-container input {
     background: transparent !important;
     border: none;
-    color: white !important;
+    color: rgb(116, 109, 109) !important;
     padding: 8px;
     width: 100%;
     outline: none;
     font-size: 0.9rem;
+    -webkit-text-fill-color: rgb(150, 143, 143) !important;
+}
+
+.search-container input::placeholder {
+    color: rgba(255, 255, 255, 0.5); 
 }
 
 .search-container input:focus, 
 .search-container input:active {
     background: transparent !important;
-    color: white !important;
+    color: rgb(112, 106, 106) !important;
 }
 
 .search-container input:-webkit-autofill,
@@ -77,6 +87,12 @@ body {
 .search-container input:-webkit-autofill:focus {
     -webkit-text-fill-color: white !important; 
     -webkit-box-shadow: 0 0 0px 1000px #1f2025 inset !important; 
+    transition: background-color 5000s ease-in-out 0s;
+}
+.search-container input:-webkit-autofill:active {
+    -webkit-text-fill-color: white !important; /* Color del texto */
+    -webkit-box-shadow: 0 0 0 30px #1f2025 inset !important; /* Fondo del input */
+    caret-color: white !important; /* Cursor blanco */
     transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -92,8 +108,13 @@ body {
     opacity: 0.5;
     padding-left: 10px;
     transition: 0.3s;
-    user-select: none;
-    display: none;
+    user-select: none;    
+    margin-left: 10px;  
+    height: 100%;   
+    display: flex;    
+    align-items: center;  
+    justify-content: center;
+    line-height: 1;
 }
 
 .clear-btn:hover {
@@ -176,6 +197,7 @@ body {
     height: 100%;
     display: flex;
     align-items: center;
+    background-color: #1b2432;
     background-size: cover;
     background-position: center;
     position: relative;
@@ -236,6 +258,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 25px;
+    align-items: start;
 }
 
 .card {
@@ -262,6 +285,8 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    image-rendering: -webkit-optimize-contrast; 
+    background-color: #1b2432;
 }
 
 .rating-badge {
@@ -322,16 +347,13 @@ body {
     display: none;
 }
 
-.slide-desc {
-    opacity: 0.9;
-    line-height: 1.5;
-    font-size: 1.1rem;
-    color: #e5e7eb;
-    margin-top: 10px;
-    max-width: 500px;
-    
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-    
+/* We use a more specific selector to win the CSS priority war */
+body div#carouselContainer .slide .slide-content .slide-desc {
+    text-transform: none !important;      /* Forces lowercase support */
+    font-variant: normal !important;      /* Disables 'Small Caps' features */
+    font-family: Arial, sans-serif !important; /* Temporarily switch to a standard font to test */
+    font-weight: 400 !important;          /* Ensures it's not a heavy bold font */
+    display: block !important;
 }
 
 /* User area aligned */
@@ -734,3 +756,4 @@ To align icon and text horizontally */
     box-shadow: 0 8px 30px rgba(168, 85, 247, 0.6);
     background: linear-gradient(135deg, #b76eff 0%, #8b5cf6 100%);
 }
+

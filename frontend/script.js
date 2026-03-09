@@ -292,12 +292,18 @@ function updateCarouselUI() {
     });
 }
 
+
+/**
+ * Handles tab switching and ensures the UI is cleared before loading new content.
+ */
 function switchTab(tab) {
     currentTab = tab;
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    document.getElementById("stats").innerHTML = "Loading...";
+    // Clear stats and content IMMEDIATELY to avoid "stuck" text
+    document.getElementById("stats").innerHTML = "";
+    document.getElementById("content").innerHTML = ""; // This removes the "Loading..."
 
 
     document.getElementById("heroCarousel").style.display = (tab === 'recommendations') ? 'none' : 'block';
