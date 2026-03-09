@@ -53,10 +53,12 @@ async function loadRecommendations() {
 
     if (!currentUser || !token) {
         contentDiv.innerHTML = `
-        <div style="text-align:center; padding:50px;">
-            <h2 style="margin-bottom:15px;">Unlock Your Recommendations</h2>
-            <p style="margin-bottom:25px; opacity:0.6;">Login to see a curated list of movies and books based on your taste.</p>
-            <button class="btn-purple" onclick="showLoginModal()">Login Now</button>
+        <div class="auth-cta-container">
+            <div class="auth-cta-icon">✨</div>
+            <h2>Unlock Your <br><span>Recommendations</span></h2>
+            <p>Login to see a curated list of movies and books based on your personal taste.</p>
+            
+            <button class="btn-cta-login" onclick="showLoginModal()">Login Now</button>
         </div>`;
         return;
     }
