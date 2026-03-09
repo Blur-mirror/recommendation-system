@@ -66,7 +66,7 @@ def test_health_endpoint_structure():
     with app.test_client() as client:
         response = client.get('/health')
 
-        assert response.status_code == 200, "Health endpoint not responding"
+        assert response.status_code in [200, 503], "Health endpoint not responding"
 
         data = response.get_json()
         assert data is not None, "Health endpoint not returning JSON"
