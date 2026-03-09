@@ -4,7 +4,7 @@ import datetime
 import os
 from db import get_connection
 from flask_bcrypt import Bcrypt
-from app import limiter
+from extensions import limiter
 
 # Define the "Authentication Wing" of our API
 auth_bp = Blueprint('auth', __name__)

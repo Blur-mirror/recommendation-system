@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from flask_limiter import Limiter # For rate limiting
+from extensions import limiter # For rate limiting
 from flask_limiter.util import get_remote_address # For rate limiting
 from flasgger import Swagger # For API documentation
 from datetime import datetime
@@ -22,15 +22,7 @@ app = Flask(__name__)
 CORS(app)
 bcrypt = Bcrypt(app)
 swagger = Swagger(app)
-
-#moved limiter to apply before all blueprints.
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"
-)
-
+limiter.init_app(app)
 
 # Register blueprints
 # This means that Any URL starting with /api/movies should be handled by movies_bp, which was already imported from routes.
