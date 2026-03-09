@@ -5,3 +5,4 @@ flask
 flask-cors
 PyJWT
 flask-bcrypt
+pytest==7.4.3
