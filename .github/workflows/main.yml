@@ -66,6 +66,12 @@ jobs:
         run: |
           curl --fail http://localhost:8080 || exit 1
 
+      - name: Run unit tests
+        run: |
+          cd backend
+          pip install pytest
+          pytest tests/ -v
+
       #Clean up
       - name: Stop Containers
         if: always()
