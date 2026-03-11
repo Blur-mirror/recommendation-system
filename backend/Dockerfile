@@ -1,5 +1,4 @@
-FROM python:3.15-rc-alpine3.22
-
+FROM python:3.11-slim
 # Explaining 'what and why' for every block as requested:
 # Set the working directory inside the container to /app
 WORKDIR /app
