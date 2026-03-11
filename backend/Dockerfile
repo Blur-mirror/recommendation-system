@@ -1,5 +1,4 @@
-# Using 3.11-slim as requested by Snyk/Lecturer
-FROM python:3.11-slim
+FROM python:3.15-rc-alpine3.22
 
 # Explaining 'what and why' for every block as requested:
 # Set the working directory inside the container to /app
