@@ -44,9 +44,10 @@ services:
     image: nginx:alpine
     container_name: recommender_frontend
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro #this mounts the nginx.conf file to the correct location in the container, ensuring that nginx serves the frontend correctly.
     networks:
       - recommender-network
     depends_on:
