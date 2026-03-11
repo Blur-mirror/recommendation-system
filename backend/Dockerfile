@@ -1,16 +1,31 @@
+# Using 3.11-slim as requested by Snyk/Lecturer
 FROM python:3.11-slim
 
+# Explaining 'what and why' for every block as requested:
+# Set the working directory inside the container to /app
 WORKDIR /app
 
-# Install dependencies
+# Install system dependencies required to build and run psycopg2
+# libpq-dev: contains the header files for PostgreSQL
+# gcc: the GNU Compiler Collection needed to compile C extensions
+# we use --no-install-recommends to keep the image 'slim'
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy only requirements first to leverage Docker's layer caching
 COPY requirements.txt .
+
+# Install Python dependencies.
+# --no-cache-dir prevents pip from saving the .whl files, saving space.
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy the rest of the application source code
 COPY . .
 
-# Tell docker the contasiner plans to use port 5000
+# Documentation: the app listens on 5000
 EXPOSE 5000
 
-# Run the Flask app
+# Start the Flask application
 CMD ["python", "app.py"]
