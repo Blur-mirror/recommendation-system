@@ -12,8 +12,9 @@ def create_tables():
             release_year INTEGER,
             rating DECIMAL(3, 1),
             poster_path TEXT,
+            description TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            
+
         )
     """)
 
@@ -25,8 +26,9 @@ def create_tables():
             authors VARCHAR(500),
             rating DECIMAL(3, 1),
             thumbnail TEXT,
+            description TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            
+
         )
     """)
 
@@ -40,7 +42,7 @@ def create_tables():
             is_admin BOOLEAN DEFAULT FALSE,
             is_banned BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            
+
         )
     """)
 
