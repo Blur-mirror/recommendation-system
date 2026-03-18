@@ -62,3 +62,5 @@ pytest tests/ -v
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript
 - **DevOps:** Docker, GitHub Actions, Webhooks
 - **APIs:** TMDB, Google Books
+
+## Webhook testing
