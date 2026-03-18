@@ -11,9 +11,7 @@ services:
     environment:
       POSTGRES_DB: recommender
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pass
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -31,7 +29,7 @@ services:
       DB_HOST: db
       DB_NAME: recommender
       DB_USER: postgres
-      DB_PASS: pass
+      DB_PASS: ${DB_PASS}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY} #include the JWT secret for user auth
     ports:
       - "5000:5000" #enables the port so we can use flask on it and get results from the requests.
