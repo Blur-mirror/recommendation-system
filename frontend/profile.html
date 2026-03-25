@@ -3,23 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LitFlick | Movies</title>
+    <title>LitFlick | Profile</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header class="main-header">
       <div class="header-left">
-        <a href="index.html" class="logo-link">
-          <img src="favicon/icono.png" alt="LitFlick" class="logo-img" />
-          <h1 class="logo">LitFlick</h1>
-        </a>
+        <a href="index.html" class="logo-link"
+          ><img src="favicon/icono.png" alt="LitFlick" class="logo-img" />
+          <h1 class="logo">LitFlick</h1></a
+        >
       </div>
       <div class="header-center">
         <div class="search-container">
           <input
             type="text"
             id="searchInput"
-            placeholder="Search movies, books..."
+            placeholder="Search..."
             onkeyup="handleSearch()"
           />
           <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()"
@@ -30,7 +30,7 @@
       <div class="header-right">
         <nav class="nav-links">
           <a href="recommendations.html" class="nav-item">For You</a>
-          <a href="index.html" class="nav-item active">Movies</a>
+          <a href="index.html" class="nav-item">Movies</a>
           <a href="books.html" class="nav-item">Books</a>
           <a
             href="admin.html"
@@ -67,40 +67,22 @@
     </header>
 
     <div class="container">
-      <div class="hero-carousel" id="heroCarousel">
-        <button class="carousel-btn prev" onclick="moveCarousel(-1)">
-          &#10094;
-        </button>
-        <div id="carouselContainer"></div>
-        <button class="carousel-btn next" onclick="moveCarousel(1)">
-          &#10095;
-        </button>
-        <div class="carousel-dots" id="carouselDots"></div>
-      </div>
       <div
         id="stats"
         style="margin-bottom: 20px; opacity: 0.6; font-size: 0.9rem"
       ></div>
       <div class="grid" id="content">
-        <div class="loading">Loading movies...</div>
+        <div class="loading">Loading profile...</div>
       </div>
     </div>
 
     <footer class="site-footer">
       <div class="footer-container">
         <div class="footer-col">
-          <a href="index.html" class="logo-link">
-            <img src="favicon/icono.png" alt="LitFlick" class="logo-img" />
-            <h1 class="logo">LitFlick</h1>
-          </a>
-          <p class="footer-desc">
-            Your destination to discover, rate, and organise the best stories.
-          </p>
-          <div class="social-icons">
-            <a href="#" class="social-link">Instagram</a>
-            <a href="#" class="social-link">Twitter/X</a>
-            <a href="#" class="social-link">Discord</a>
-          </div>
+          <a href="index.html" class="logo-link"
+            ><img src="favicon/icono.png" alt="LitFlick" class="logo-img" />
+            <h1 class="logo">LitFlick</h1></a
+          >
         </div>
         <div class="footer-col">
           <h3>Explore</h3>
@@ -110,32 +92,12 @@
             <li><a href="books.html">Books</a></li>
           </ul>
         </div>
-        <div class="footer-col">
-          <h3>Legal</h3>
-          <ul class="footer-links">
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-            <li><a href="#">Cookie Policy</a></li>
-            <li><a href="#">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h3>Stay Updated</h3>
-          <p style="color: #94a3b8; line-height: 1.6; margin-bottom: 14px">
-            Weekly recommendations to your inbox.
-          </p>
-          <form class="newsletter-form">
-            <input type="email" placeholder="Your email address" />
-            <button type="button">Subscribe</button>
-          </form>
-        </div>
       </div>
       <div class="footer-bottom">
         <p>&copy; 2026 LitFlick Inc. All rights reserved.</p>
       </div>
     </footer>
 
-    <!-- Modals -->
     <div class="modal" id="loginModal">
       <div class="modal-content" style="position: relative">
         <span
@@ -195,12 +157,10 @@
       <div class="modal-content logout-modal-box">
         <div class="modal-icon">⚠️</div>
         <h2>Sign Out</h2>
-        <p>Are you sure you want to log out?</p>
+        <p>Are you sure?</p>
         <div class="modal-actions">
-          <button class="btn-cancel" onclick="closeLogoutModal()">
-            Cancel
-          </button>
-          <button class="btn-confirm-logout" onclick="confirmLogout()">
+          <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button
+          ><button class="btn-confirm-logout" onclick="confirmLogout()">
             Logout
           </button>
         </div>
@@ -209,14 +169,14 @@
 
     <script src="script.js"></script>
     <script>
-      // Page-specific init
       window.onload = async () => {
-        const searchInput = document.getElementById("searchInput");
-        const clearBtn = document.getElementById("clearSearch");
-        if (searchInput) searchInput.value = "";
-        if (clearBtn) clearBtn.style.display = "none";
         await checkAuth();
-        loadData("movies");
+        if (!currentUser) {
+          // Not logged in — redirect to movies with login modal trigger
+          window.location.href = "index.html";
+          return;
+        }
+        showProfile();
       };
     </script>
   </body>

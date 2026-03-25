@@ -5,6 +5,8 @@ import os
 from db import get_connection
 from flask_bcrypt import Bcrypt
 from extensions import limiter
+import base64
+import re
 
 # Define the "Authentication Wing" of our API
 auth_bp = Blueprint('auth', __name__)
@@ -162,7 +164,7 @@ def verify_token():
         cur = conn.cursor()
 
         cur.execute("""
-            SELECT id, username, email, created_at
+            SELECT id, username, email, created_at, is_admin, avatar_url
             FROM users
             WHERE id = %s
         """, (payload['user_id'],))
@@ -180,11 +182,55 @@ def verify_token():
                 "id": user[0],
                 "username": user[1],
                 "email": user[2],
-                "created_at": user[3].isoformat()
+                "created_at": user[3].isoformat(),
+                "is_admin": user[4],
+                "avatar_url": user[5]
             }
         }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-    
+
+@auth_bp.route('/upload-avatar', methods=['POST'])
+def upload_avatar():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({"error": "Authentication required"}), 401
+
+        token = auth_header.split(' ')[1]
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+
+        user_id = payload['user_id']
+
+        # Expect JSON with base64 image: { "avatar": "data:image/png;base64,..." }
+        data = request.get_json()
+        if not data or 'avatar' not in data:
+            return jsonify({"error": "No avatar data provided"}), 400
+
+        avatar_data = data['avatar']
+
+        # Validate it's a data URL
+        if not avatar_data.startswith('data:image/'):
+            return jsonify({"error": "Invalid image format"}), 400
+
+        # Store the base64 data URL directly in the DB
+        # For a small project this is fine — no file system complexity
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE users SET avatar_url = %s WHERE id = %s RETURNING avatar_url",
+            (avatar_data, user_id)
+        )
+        result = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({"avatar_url": result[0]}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

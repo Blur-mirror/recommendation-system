@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 import jwt
 from db import get_connection
 import os
+from extensions import limiter
 
 # Create the "Ratings Department"
 ratings_bp = Blueprint('ratings', __name__)
@@ -91,6 +92,7 @@ def rate_content(content_type, content_id):
         return jsonify({"error": str(e)}), 500
 
 @ratings_bp.route('/<content_type>/<int:content_id>', methods=['GET'])
+@limiter.exempt  # reading ratings shouldn't be rate limited
 def get_content_ratings(content_type, content_id):
     """Get ratings for a specific movie or book"""
     #Validation: Ensure they aren't trying to rate a 'pizza' or something invalid
