@@ -91,8 +91,8 @@ def init_db_extras():
     try:
         # Establish connection with the database
         conn = get_connection()
-        cur = conn.cursor()
-        
+        cur = conn.cursor()        
+
         # Add the 'avatar_url' column to the users table if it's missing
         # This allows storing links to profile pictures
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;")
@@ -108,6 +108,6 @@ def init_db_extras():
         print(f"ℹ️ Info DB: {e}")
 
 if __name__ == '__main__':
-    init_db_extras()  
-    
+    init_db_extras()
+
     app.run(host='0.0.0.0', port=5000, debug=True)

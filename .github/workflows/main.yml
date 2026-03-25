@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [Main, dev, feature/*]
+    branches: [Main, dev, feature/*, Feature/*]
   pull_request:
     branches: [Main, dev, feature/*]
 
@@ -42,10 +42,19 @@ jobs:
       - name: Setup Environment
         run: |
           touch .env
-          echo "DATABASE_URL=postgresql://user:pass@db:5432/dbname" >> .env
+          # DB (used by postgres container)
+          echo "POSTGRES_USER=postgres" >> .env
+          echo "POSTGRES_PASSWORD=postgres" >> .env
+          echo "POSTGRES_DB=recommender" >> .env
+
+          # Backend (must MATCH DB)
+          echo "DB_PASS=postgres" >> .env
+
+          # App config
+          echo "DATABASE_URL=postgresql://postgres:postgres@db:5432/recommender" >> .env
+          echo "JWT_SECRET_KEY=dummy_key" >> .env
           echo "TMDB_API_KEY=dummy_key" >> .env
           echo "GOOGLE_BOOKS_KEY=dummy_key" >> .env
-          echo "JWT_SECRET_KEY=dummy_key" >> .env
 
       #Build docker containers
       - name: Build Docker Containers
@@ -77,9 +86,10 @@ jobs:
       - name: Show container logs
         run: docker compose logs
 
-      - name: health check frontend
+      - name: Health check frontend
         run: |
-          curl --fail http://localhost:8080 || exit 1
+          # Changed 8080 to 80
+          curl --fail http://localhost || exit 1
 
       - name: Run unit tests
         run: |

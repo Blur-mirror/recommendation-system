@@ -11,9 +11,7 @@ services:
     environment:
       POSTGRES_DB: recommender
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pass
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -31,7 +29,7 @@ services:
       DB_HOST: db
       DB_NAME: recommender
       DB_USER: postgres
-      DB_PASS: pass
+      DB_PASS: postgres
       JWT_SECRET_KEY: ${JWT_SECRET_KEY} #include the JWT secret for user auth
     ports:
       - "5000:5000" #enables the port so we can use flask on it and get results from the requests.
@@ -44,9 +42,10 @@ services:
     image: nginx:alpine
     container_name: recommender_frontend
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro #this mounts the nginx.conf file to the correct location in the container, ensuring that nginx serves the frontend correctly.
     networks:
       - recommender-network
     depends_on:
