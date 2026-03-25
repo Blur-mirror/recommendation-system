@@ -164,15 +164,12 @@ def verify_token():
         cur = conn.cursor()
 
         cur.execute("""
-        SELECT id, username, email, created_at
+        SELECT id, username, email, created_at, is_admin
         FROM users
         WHERE id = %s
     """, (payload['user_id'],))
 
         user = cur.fetchone()
-
-        if not user:
-            return jsonify({"error": "User not found"}), 404
 
         return jsonify({
             "valid": True,
@@ -180,7 +177,8 @@ def verify_token():
                 "id": user[0],
                 "username": user[1],
                 "email": user[2],
-                "created_at": user[3].isoformat()
+                "created_at": user[3].isoformat(),
+                "is_admin": user[4]
             }
         }), 200
 
