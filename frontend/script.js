@@ -19,45 +19,6 @@ let slidesData = []; // Stores the top 5 items currently shown in the Carousel
 let currentUser = null; // Stores the logged-in user object
 let currentPage = 1; // Tracks the current page of results
 
-// --- 3. INITIALIZATION ---
-/**
- * Runs when the browser window finishes loading.
- * Initializes the Auth check and sets the default view to 'movies'.
- */
-window.onload = async () => {
-  const searchInput = document.getElementById("searchInput");
-  const clearBtn = document.getElementById("clearSearch");
-  if (searchInput) searchInput.value = "";
-  if (clearBtn) clearBtn.style.display = "none";
-
-  await checkAuth();
-
-  // Read hash and restore state
-  const hash = window.location.hash.replace("#", "");
-  const validTabs = ["movies", "books", "recommendations"];
-
-  if (hash === "admin") {
-    showAdminDashboard();
-  } else if (hash === "profile") {
-    showProfile();
-  } else if (hash.startsWith("item-")) {
-    // e.g. #item-movies-26 or #item-books-27
-    const parts = hash.split("-"); // ["item", "movies", "26"]
-    const type = parts[1];
-    const id = parseInt(parts[2]);
-    if (type && id) {
-      // Load the tab data in background then open the detail modal
-      await loadData(type);
-      const item = allData.find((i) => i.id === id);
-      if (item) showItemDetail(item, type);
-    } else {
-      switchTab("movies");
-    }
-  } else {
-    switchTab(validTabs.includes(hash) ? hash : "movies");
-  }
-};
-
 // --- 4. AUTHENTICATION LOGIC ---
 
 /**
@@ -91,7 +52,7 @@ function updateUIForLoggedInUser(user) {
 
   // Display user avatar and name with a link to the profile
   usernameSpan.innerHTML = `
-        <div class="user-profile-link" onclick="showProfile()" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+        <div class="user-profile-link" onclick="goToProfile()"" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
             <img src="${user.avatar_url || "https://cdn-icons-png.flaticon.com/512/1144/1144760.png"}"
                 alt="avatar" class="nav-avatar" id="navAvatar">
             ${user.username}
@@ -446,23 +407,13 @@ function moveCarousel(dir) {
  * Navigates between Movies, Books, and Recommendations tabs.
  */
 function switchTab(tab) {
-  currentTab = tab;
-  // Push to history so back button works, not just hash assignment
-  // replaceState keeps the URL clean without adding a history entry on every tab click
-  history.replaceState(null, "", "#" + tab);
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  document.getElementById("stats").innerHTML = "";
-  document.getElementById("heroCarousel").style.display =
-    tab === "recommendations" ? "none" : "block";
-
-  if (tab === "recommendations") {
-    loadRecommendations();
-  } else {
-    loadData(tab);
-  }
+  const pages = {
+    movies: "index.html",
+    books: "books.html",
+    recommendations: "recommendations.html",
+  };
+  if (pages[tab]) window.location.href = pages[tab];
 }
-
 // --- 7. INTERACTIVE FEATURES (RATINGS & SEARCH) ---
 
 /**
@@ -706,13 +657,15 @@ async function updateUserData(e) {
  *   GET /api/profile/       → user info + aggregate stats
  *   GET /api/profile/ratings → every item the user has rated
  */
+function goToProfile() {
+  window.location.href = "profile.html";
+}
 async function showProfile() {
   if (!currentUser) return;
 
   // Hide carousel, clear stats label
-  document.getElementById("heroCarousel").style.display = "none";
-  document.getElementById("stats").innerHTML = "";
-
+  const carousel = document.getElementById("heroCarousel");
+  if (carousel) carousel.style.display = "none";
   const contentDiv = document.getElementById("content");
 
   // Show a loading state immediately so the click feels responsive
@@ -774,20 +727,25 @@ async function showProfile() {
                 year: "numeric",
               });
               return `
-            <div class="rated-item" style="
-              display: flex; justify-content: space-between; align-items: center;
-              padding: 12px 0; border-bottom: 1px solid #222;">
-              <div>
-                <span style="font-size:0.65rem; text-transform:uppercase; opacity:0.4;
-                  letter-spacing:1px; margin-right:8px;">${r.kind}</span>
-                <span style="font-weight:600;">${item.title}</span>
-                ${sub ? `<span style="font-size:0.75rem; opacity:0.5; margin-left:8px;">${sub}</span>` : ""}
-              </div>
-              <div style="text-align:right; flex-shrink:0; margin-left:16px;">
-                <div style="color:#ffd700; font-size:0.9rem;">${stars}</div>
-                <div style="font-size:0.65rem; opacity:0.4; margin-top:2px;">${date}</div>
-              </div>
-            </div>`;
+  <div class="rated-item" style="
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid #222;
+    cursor: pointer; transition: opacity 0.15s;"
+    onclick="openRatedItem(${JSON.stringify(r).replace(/"/g, "&quot;")})"
+    onmouseover="this.style.opacity='0.7'"
+    onmouseout="this.style.opacity='1'">
+    <div>
+      <span style="font-size:0.65rem; text-transform:uppercase; opacity:0.4;
+        letter-spacing:1px; margin-right:8px;">${r.kind}</span>
+      <span style="font-weight:600;">${item.title}</span>
+      ${sub ? `<span style="font-size:0.75rem; opacity:0.5; margin-left:8px;">${sub}</span>` : ""}
+      <span style="font-size:0.65rem; opacity:0.3; margin-left:8px;">→ view</span>
+    </div>
+    <div style="text-align:right; flex-shrink:0; margin-left:16px;">
+      <div style="color:#ffd700; font-size:0.9rem;">${stars}</div>
+      <div style="font-size:0.65rem; opacity:0.4; margin-top:2px;">${date}</div>
+    </div>
+  </div>`;
             })
             .join("");
 
@@ -900,8 +858,10 @@ async function showAdminDashboard() {
     return;
   }
 
-  document.getElementById("heroCarousel").style.display = "none";
-  document.getElementById("stats").innerHTML = "";
+  const carousel = document.getElementById("heroCarousel");
+  if (carousel) carousel.style.display = "none";
+  const stats = document.getElementById("stats");
+  if (stats) stats.innerHTML = "";
 
   const contentDiv = document.getElementById("content");
   contentDiv.innerHTML = `
@@ -977,25 +937,37 @@ async function showAdminDashboard() {
           }
         </td>
         <td style="padding:10px 8px; text-align:right;">
-          ${
-            !u.is_admin
-              ? `
-            <button onclick="adminBanUser(${u.id}, ${!u.is_banned})"
-              style="font-size:0.7rem; padding:4px 10px; border-radius:6px; cursor:pointer;
-                background:${u.is_banned ? "#22c55e22" : "#ef444422"};
-                color:${u.is_banned ? "#22c55e" : "#ef4444"};
-                border:1px solid ${u.is_banned ? "#22c55e" : "#ef4444"};">
-              ${u.is_banned ? "Unban" : "Ban"}
-            </button>
-            <button onclick="adminPromoteUser(${u.id}, ${!u.is_admin})"
-              style="font-size:0.7rem; padding:4px 10px; border-radius:6px; cursor:pointer;
-                background:#a855f722; color:#a855f7; border:1px solid #a855f7;
-                margin-left:6px;">
-              ${u.is_admin ? "Demote" : "Promote"}
-            </button>`
-              : "—"
-          }
-        </td>
+  ${
+    !u.is_banned
+      ? `
+    <button onclick="adminBanUser(${u.id}, true)"
+      style="font-size:0.7rem; padding:4px 10px; border-radius:6px; cursor:pointer;
+        background:#ef444422; color:#ef4444; border:1px solid #ef4444;">
+      Ban
+    </button>`
+      : `
+    <button onclick="adminBanUser(${u.id}, false)"
+      style="font-size:0.7rem; padding:4px 10px; border-radius:6px; cursor:pointer;
+        background:#22c55e22; color:#22c55e; border:1px solid #22c55e;">
+      Unban
+    </button>`
+  }
+  ${
+    !u.is_admin
+      ? `
+    <button onclick="adminPromoteUser(${u.id}, true)"
+      style="font-size:0.7rem; padding:4px 10px; border-radius:6px; cursor:pointer;
+        background:#a855f722; color:#a855f7; border:1px solid #a855f7; margin-left:6px;">
+      Promote
+    </button>`
+      : `
+    <button onclick="adminPromoteUser(${u.id}, false)"
+      style="font-size:0.7rem; padding:4px 10px; border-radius:6px; cursor:pointer;
+        background:#f9731622; color:#f97316; border:1px solid #f97316; margin-left:6px;">
+      Demote
+    </button>`
+  }
+</td>
       </tr>`,
       )
       .join("");
@@ -1408,4 +1380,39 @@ async function rateFromDetail(type, id, val) {
     });
   }
   if (label) label.textContent = `You rated this ${val}/5`;
+}
+
+async function openRatedItem(r) {
+  const item = r.movie || r.book;
+  const type = r.kind === "movie" ? "movies" : "books";
+
+  // Try to find the full item in allData first (already loaded, free)
+  let fullItem = allData.find((i) => i.id === item.id);
+
+  // If not in allData (different tab was active), fetch it
+  if (!fullItem) {
+    try {
+      const res = await fetch(`${API_URL}/${type}/?page=1`);
+      const data = await res.json();
+      fullItem = (data[type] || []).find((i) => i.id === item.id);
+    } catch (e) {
+      /* fall through to minimal */
+    }
+  }
+
+  // Fall back to minimal object if fetch failed
+  if (!fullItem) {
+    fullItem = {
+      id: item.id,
+      title: item.title,
+      rating: item.average_rating || 0,
+      description: null,
+      release_year: item.release_year || null,
+      poster_path: null,
+      authors: item.authors || null,
+      thumbnail: null,
+    };
+  }
+
+  showItemDetail(fullItem, type);
 }
