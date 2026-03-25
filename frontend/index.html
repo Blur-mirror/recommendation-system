@@ -1,156 +1,270 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LitFlick | Movie & Book Recommender</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LitFlick | Movie & Book Recommender</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-  <header class="main-header">
-    <div class="header-left">
-      <a href="#" class="logo-link">
-        <img src="favicon/icono.png" alt="LitFlick Logo" class="logo-img">
-      <h1 class="logo">LitFlick</h1>
-      </a>
-    </div>
-
-    <div class="header-center">
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search movies, books..." onkeyup="handleSearch()">
-        <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()">&times;</span>
-    </div>
-</div>
-
-    <div class="header-right">
-      <nav class="nav-links">
-        <a href="#" class="nav-item" onclick="switchTab('recommendations')">For You- yay!</a>
-        <a href="#" class="nav-item" onclick="switchTab('movies')">Movies</a>
-        <a href="#" class="nav-item" onclick="switchTab('books')">Books</a>
-      </nav>
-
-      <div class="auth-buttons">
-        <div class="user-info" id="userInfo">
-          <span id="username" style="margin-right: 10px; font-size: 0.9rem;"></span>
-        </div>
-        <button class="btn-outline" id="loginBtn" onclick="showLoginModal()">Login</button>
-        <button class="btn-purple" id="registerBtn" onclick="showRegisterModal()">Register</button>
-        <button class="btn-outline" id="logoutBtn" onclick="logout()" style="display: none">Logout</button>
+  <body>
+    <header class="main-header">
+      <div class="header-left">
+        <a href="#" class="logo-link">
+          <img src="favicon/icono.png" alt="LitFlick Logo" class="logo-img" />
+          <h1 class="logo">LitFlick</h1>
+        </a>
       </div>
-    </div>
-  </header>
 
-  <div class="container">
-    <div class="hero-carousel" id="heroCarousel">
-      <button class="carousel-btn prev" onclick="moveCarousel(-1)">&#10094;</button>
-      <div class="carousel-container" id="carouselContainer"></div>
-      <button class="carousel-btn next" onclick="moveCarousel(1)">&#10095;</button>
-      <div class="carousel-dots" id="carouselDots"></div>
-    </div>
-
-    <div id="stats" style="margin-bottom: 20px; opacity: 0.6; font-size: 0.9rem;"></div>
-
-    <div class="grid" id="content">
-      <div class="loading">Loading content...</div>
-    </div>
-  </div>
-
-  <div class="modal" id="loginModal">
-    <div class="modal-content" style="position: relative;">
-      <span onclick="closeModal()"
-        style="position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 1.5rem; opacity: 0.5;">&times;</span>
-
-      <h2 id="modalTitle" style="margin-bottom: 20px;">Welcome</h2>
-      <form id="authForm" onsubmit="handleAuth(event)">
-        <div id="emailGroup" class="hidden" style="margin-bottom: 15px;">
-          <input type="email" id="email" placeholder="Email"
-            style="width:100%; padding:10px; background:#0f1014; border:1px solid #333; color:white; border-radius:5px;">
-        </div>
-        <input type="text" id="authUsername" placeholder="Username" required
-          style="width:100%; padding:10px; margin-bottom:15px; background:#0f1014; border:1px solid #333; color:white; border-radius:5px;">
-        <input type="password" id="authPassword" placeholder="Password" required
-          style="width:100%; padding:10px; margin-bottom:15px; background:#0f1014; border:1px solid #333; color:white; border-radius:5px;">
-        <button type="submit" class="btn-purple" style="width: 100%; padding: 12px;">Continue</button>
-      </form>
-      <p style="text-align:center; margin-top:15px; font-size:0.8rem;">
-        <a onclick="toggleAuthMode()" style="color:#a855f7; cursor:pointer;">Switch Login/Register</a>
-      </p>
-    </div>
-  </div>
-
-  <footer class="site-footer">
-    <div class="footer-container">
-
-      <div class="footer-col">
-        <div class="header-left">
-      <a href="#" class="logo-link">
-        <img src="favicon/icono.png" alt="LitFlick Logo" class="logo-img">
-      <h1 class="logo">LitFlick</h1>
-      </a>
-      </div>
-        <p class="footer-desc">
-          Your ultimate destination to discover, rate, and organize the best stories, whether on the big
-          screen or on paper.
-        </p>
-        <div class="social-icons">
-          <a href="#" class="social-link">Instagram</a>
-          <a href="#" class="social-link">Twitter/X</a>
-          <a href="#" class="social-link">Discord</a>
+      <div class="header-center">
+        <div class="search-container">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search movies, books..."
+            onkeyup="handleSearch()"
+          />
+          <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()"
+            >&times;</span
+          >
         </div>
       </div>
 
-      <div class="footer-col">
-        <h3>Explore</h3>
-        <ul class="footer-links">
-          <li><a href="javascript:void(0)" onclick="switchTab('recommendations')">For You</a></li>
-          <li><a href="javascript:void(0)" onclick="switchTab('movies')">Movies</a></li>
-          <li><a href="javascript:void(0)" onclick="switchTab('books')">Books</a></li>
-          <li><a href="#">Curated Lists</a></li>
-        </ul>
+      <div class="header-right">
+        <nav class="nav-links">
+          <a href="#" class="nav-item" onclick="switchTab('recommendations')"
+            >For You- yay!</a
+          >
+          <a href="#" class="nav-item" onclick="switchTab('movies')">Movies</a>
+          <a href="#" class="nav-item" onclick="switchTab('books')">Books</a>
+          <a
+            href="#"
+            class="nav-item"
+            id="adminNavLink"
+            onclick="showAdminDashboard()"
+            style="display: none; color: #a855f7"
+            >Admin</a
+          >
+        </nav>
+
+        <div class="auth-buttons">
+          <div class="user-info" id="userInfo">
+            <span
+              id="username"
+              style="margin-right: 10px; font-size: 0.9rem"
+            ></span>
+          </div>
+          <button class="btn-outline" id="loginBtn" onclick="showLoginModal()">
+            Login
+          </button>
+          <button
+            class="btn-purple"
+            id="registerBtn"
+            onclick="showRegisterModal()"
+          >
+            Register
+          </button>
+          <button
+            class="btn-outline"
+            id="logoutBtn"
+            onclick="logout()"
+            style="display: none"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="hero-carousel" id="heroCarousel">
+        <button class="carousel-btn prev" onclick="moveCarousel(-1)">
+          &#10094;
+        </button>
+        <div class="carousel-container" id="carouselContainer"></div>
+        <button class="carousel-btn next" onclick="moveCarousel(1)">
+          &#10095;
+        </button>
+        <div class="carousel-dots" id="carouselDots"></div>
       </div>
 
-      <div class="footer-col">
-        <h3>Legal</h3>
-        <ul class="footer-links">
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Terms of Service</a></li>
-          <li><a href="#">Cookie Policy</a></li>
-          <li><a href="#">Contact / Help</a></li>
-        </ul>
-      </div>
+      <div
+        id="stats"
+        style="margin-bottom: 20px; opacity: 0.6; font-size: 0.9rem"
+      ></div>
 
-      <div class="footer-col newsletter-col">
-        <h3>Stay Updated</h3>
-        <p>Get the best weekly recommendations sent to your inbox.</p>
-        <form class="newsletter-form">
-          <input type="email" placeholder="Your email address">
-          <button type="button">Subscribe</button>
+      <div class="grid" id="content">
+        <div class="loading">Loading content...</div>
+      </div>
+    </div>
+
+    <div class="modal" id="loginModal">
+      <div class="modal-content" style="position: relative">
+        <span
+          onclick="closeModal()"
+          style="
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            opacity: 0.5;
+          "
+          >&times;</span
+        >
+
+        <h2 id="modalTitle" style="margin-bottom: 20px">Welcome</h2>
+        <form id="authForm" onsubmit="handleAuth(event)">
+          <div id="emailGroup" class="hidden" style="margin-bottom: 15px">
+            <input
+              type="email"
+              id="email"
+              placeholder="Email"
+              style="
+                width: 100%;
+                padding: 10px;
+                background: #0f1014;
+                border: 1px solid #333;
+                color: white;
+                border-radius: 5px;
+              "
+            />
+          </div>
+          <input
+            type="text"
+            id="authUsername"
+            placeholder="Username"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              margin-bottom: 15px;
+              background: #0f1014;
+              border: 1px solid #333;
+              color: white;
+              border-radius: 5px;
+            "
+          />
+          <input
+            type="password"
+            id="authPassword"
+            placeholder="Password"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              margin-bottom: 15px;
+              background: #0f1014;
+              border: 1px solid #333;
+              color: white;
+              border-radius: 5px;
+            "
+          />
+          <button
+            type="submit"
+            class="btn-purple"
+            style="width: 100%; padding: 12px"
+          >
+            Continue
+          </button>
         </form>
+        <p style="text-align: center; margin-top: 15px; font-size: 0.8rem">
+          <a onclick="toggleAuthMode()" style="color: #a855f7; cursor: pointer"
+            >Switch Login/Register</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div class="footer-col">
+          <div class="header-left">
+            <a href="#" class="logo-link">
+              <img
+                src="favicon/icono.png"
+                alt="LitFlick Logo"
+                class="logo-img"
+              />
+              <h1 class="logo">LitFlick</h1>
+            </a>
+          </div>
+          <p class="footer-desc">
+            Your ultimate destination to discover, rate, and organize the best
+            stories, whether on the big screen or on paper.
+          </p>
+          <div class="social-icons">
+            <a href="#" class="social-link">Instagram</a>
+            <a href="#" class="social-link">Twitter/X</a>
+            <a href="#" class="social-link">Discord</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h3>Explore</h3>
+          <ul class="footer-links">
+            <li>
+              <a
+                href="javascript:void(0)"
+                onclick="switchTab('recommendations')"
+                >For You</a
+              >
+            </li>
+            <li>
+              <a href="javascript:void(0)" onclick="switchTab('movies')"
+                >Movies</a
+              >
+            </li>
+            <li>
+              <a href="javascript:void(0)" onclick="switchTab('books')"
+                >Books</a
+              >
+            </li>
+            <li><a href="#">Curated Lists</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h3>Legal</h3>
+          <ul class="footer-links">
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">Contact / Help</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col newsletter-col">
+          <h3>Stay Updated</h3>
+          <p>Get the best weekly recommendations sent to your inbox.</p>
+          <form class="newsletter-form">
+            <input type="email" placeholder="Your email address" />
+            <button type="button">Subscribe</button>
+          </form>
+        </div>
       </div>
 
-    </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 LitFlick Inc. All rights reserved.</p>
+      </div>
+    </footer>
 
-    <div class="footer-bottom">
-      <p>&copy; 2026 LitFlick Inc. All rights reserved.</p>
-    </div>
-  </footer>
+    <script src="script.js"></script>
 
-  <script src="script.js"></script>
-
-  <div id="logoutModal" class="modal">
-    <div class="modal-content logout-modal-box">
+    <div id="logoutModal" class="modal">
+      <div class="modal-content logout-modal-box">
         <div class="modal-icon">⚠️</div>
         <h2>Sign Out</h2>
         <p>Are you sure you want to log out of LitFlick?</p>
         <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
-            <button class="btn-confirm-logout" onclick="confirmLogout()">Logout</button>
+          <button class="btn-cancel" onclick="closeLogoutModal()">
+            Cancel
+          </button>
+          <button class="btn-confirm-logout" onclick="confirmLogout()">
+            Logout
+          </button>
         </div>
+      </div>
     </div>
-</div>
-
-</body>
-
+  </body>
 </html>

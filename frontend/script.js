@@ -24,16 +24,38 @@ let currentPage = 1; // Tracks the current page of results
  * Runs when the browser window finishes loading.
  * Initializes the Auth check and sets the default view to 'movies'.
  */
-window.onload = () => {
+window.onload = async () => {
   const searchInput = document.getElementById("searchInput");
   const clearBtn = document.getElementById("clearSearch");
-
-  // Hide the "x" button and clear input on page refresh to ensure a clean UI
   if (searchInput) searchInput.value = "";
   if (clearBtn) clearBtn.style.display = "none";
 
-  checkAuth();
-  switchTab("movies");
+  await checkAuth();
+
+  // Read hash and restore state
+  const hash = window.location.hash.replace("#", "");
+  const validTabs = ["movies", "books", "recommendations"];
+
+  if (hash === "admin") {
+    showAdminDashboard();
+  } else if (hash === "profile") {
+    showProfile();
+  } else if (hash.startsWith("item-")) {
+    // e.g. #item-movies-26 or #item-books-27
+    const parts = hash.split("-"); // ["item", "movies", "26"]
+    const type = parts[1];
+    const id = parseInt(parts[2]);
+    if (type && id) {
+      // Load the tab data in background then open the detail modal
+      await loadData(type);
+      const item = allData.find((i) => i.id === id);
+      if (item) showItemDetail(item, type);
+    } else {
+      switchTab("movies");
+    }
+  } else {
+    switchTab(validTabs.includes(hash) ? hash : "movies");
+  }
 };
 
 // --- 4. AUTHENTICATION LOGIC ---
@@ -81,6 +103,10 @@ function updateUIForLoggedInUser(user) {
   document.getElementById("loginBtn").style.display = "none";
   document.getElementById("registerBtn").style.display = "none";
   document.getElementById("logoutBtn").style.display = "block";
+
+  // Show admin nav link only for admins
+  const adminLink = document.getElementById("adminNavLink");
+  if (adminLink) adminLink.style.display = user.is_admin ? "inline" : "none";
 }
 
 /**
@@ -256,7 +282,7 @@ function renderGrid(data, type) {
         startingImg = `${TMDB_BASE}${item.poster_path}`;
 
       return `
-        <div class="card">
+      <div class="card" onclick="showItemDetail(${JSON.stringify(item).replace(/"/g, "&quot;")}, '${itemType}')" style="cursor:pointer;">
             <div class="card-image-container">
                 <span class="rating-badge">★ ${item.rating ? Number(item.rating).toFixed(1) : "0.0"}</span>
                 <img src="${startingImg}"
@@ -421,12 +447,12 @@ function moveCarousel(dir) {
  */
 function switchTab(tab) {
   currentTab = tab;
+  // Push to history so back button works, not just hash assignment
+  // replaceState keeps the URL clean without adding a history entry on every tab click
+  history.replaceState(null, "", "#" + tab);
 
   window.scrollTo({ top: 0, behavior: "smooth" });
-
-  // Cambia esto de "Loading..." a "" para que no se vea el texto
   document.getElementById("stats").innerHTML = "";
-
   document.getElementById("heroCarousel").style.display =
     tab === "recommendations" ? "none" : "block";
 
@@ -592,87 +618,46 @@ window.onclick = function (event) {
 // --- 9. PROFILE MANAGEMENT ---
 
 /**
- * Renders the Profile Settings view inside the main content area.
- */
-function showProfile() {
-  if (!currentUser) return;
-
-  document.getElementById("heroCarousel").style.display = "none";
-  document.getElementById("stats").innerHTML = "User Settings";
-
-  const contentDiv = document.getElementById("content");
-  contentDiv.innerHTML = `
-        <div class="profile-container" style="max-width: 600px; margin: 0 auto; padding: 40px; background: #1b2432; border-radius: 20px; grid-column: 1 / -1;">
-            <div style="text-align:center; margin-bottom: 30px;">
-                <div style="position: relative; display: inline-block;">
-                    <img src="${currentUser.avatar_url || "https://cdn-icons-png.flaticon.com/512/1144/1144760.png"}"
-                        id="profilePageAvatar"
-                        style="width:150px; height:150px; border-radius:50%; object-fit:cover; border: 3px solid #a855f7;">
-                    <label for="avatarInput" style="position:absolute; bottom:5px; right:5px; background:#a855f7; padding:8px; border-radius:50%; cursor:pointer;">📸</label>
-                    <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
-                </div>
-            </div>
-
-            <form id="editProfileForm" onsubmit="updateUserData(event)" style="display: flex; flex-direction: column; gap: 15px;">
-                <div class="input-group">
-                    <label style="display:block; font-size: 0.8rem; opacity: 0.6; margin-bottom: 5px;">Username</label>
-                    <input type="text" id="editUsername" value="${currentUser.username}" class="profile-input">
-                </div>
-                <div class="input-group">
-                    <label style="display:block; font-size: 0.8rem; opacity: 0.6; margin-bottom: 5px;">Email</label>
-                    <input type="email" id="editEmail" value="${currentUser.email || ""}" class="profile-input">
-                </div>
-                <div class="input-group">
-                    <label style="display:block; font-size: 0.8rem; opacity: 0.6; margin-bottom: 5px;">New Password (leave blank to keep current)</label>
-                    <input type="password" id="editPassword" placeholder="********" class="profile-input">
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="submit" class="btn-purple" style="flex: 1;">Save Changes</button>
-                    <button type="button" class="btn-outline" onclick="switchTab('movies')" style="flex: 1;">Cancel</button>
-                </div>
-            </form>
-        </div>
-    `;
-}
-
-/**
  * Handles avatar image upload to the server.
  */
 async function uploadAvatar(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  // Preview image locally immediately
   const reader = new FileReader();
-  reader.onload = function (e) {
-    document.getElementById("profilePageAvatar").src = e.target.result;
-    document.getElementById("navAvatar").src = e.target.result;
+  reader.onload = async function (e) {
+    const base64 = e.target.result; // already a data URL
+
+    // Preview immediately
+    document.getElementById("profilePageAvatar").src = base64;
+    const navAvatar = document.getElementById("navAvatar");
+    if (navAvatar) navAvatar.src = base64;
+
+    // Save to backend
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${API_URL}/auth/upload-avatar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ avatar: base64 }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        currentUser.avatar_url = data.avatar_url;
+      } else {
+        const err = await res.json();
+        alert("Upload failed: " + err.error);
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+    }
   };
   reader.readAsDataURL(file);
-
-  // Prepare multipart form data
-  const formData = new FormData();
-  formData.append("avatar", file);
-
-  const token = localStorage.getItem("token");
-  try {
-    const res = await fetch(`${API_URL}/auth/upload-avatar`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      currentUser.avatar_url = data.avatar_url;
-      alert("Avatar updated successfully!");
-    }
-  } catch (e) {
-    console.error("Upload failed", e);
-  }
 }
-
 /**
  * Updates user credentials (username, email, password).
  */
@@ -707,4 +692,720 @@ async function updateUserData(e) {
     console.error("Connection failed during update:", error);
     switchTab("movies");
   }
+}
+// ============================================================
+// LITFLICK — PROFILE & ADMIN ADDITIONS
+// Paste this block at the end of script.js
+// ============================================================
+
+// --- PROFILE PAGE ---
+
+/**
+ * Renders the full user profile: stats + rated items history.
+ * Replaces the old showProfile() stub. Calls:
+ *   GET /api/profile/       → user info + aggregate stats
+ *   GET /api/profile/ratings → every item the user has rated
+ */
+async function showProfile() {
+  if (!currentUser) return;
+
+  // Hide carousel, clear stats label
+  document.getElementById("heroCarousel").style.display = "none";
+  document.getElementById("stats").innerHTML = "";
+
+  const contentDiv = document.getElementById("content");
+
+  // Show a loading state immediately so the click feels responsive
+  contentDiv.innerHTML = `
+    <div class="profile-container" style="grid-column: 1 / -1;">
+      <div class="loading">Loading your profile...</div>
+    </div>`;
+
+  const token = localStorage.getItem("token");
+
+  try {
+    // Fire both requests in parallel — no reason to wait on one before the other
+    const [profileRes, ratingsRes] = await Promise.all([
+      fetch(`${API_URL}/profile/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_URL}/profile/ratings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
+
+    const profileData = await profileRes.json();
+    const ratingsData = await ratingsRes.json();
+
+    if (!profileRes.ok) {
+      contentDiv.innerHTML = `<p style="color:red; grid-column:1/-1;">Error loading profile: ${profileData.error}</p>`;
+      return;
+    }
+
+    const { user, statistics } = profileData;
+
+    // Build the rated-items HTML. Movies and books come back separately — merge and label them.
+    const allRated = [
+      ...(ratingsData.movie_ratings || []).map((r) => ({
+        ...r,
+        kind: "movie",
+      })),
+      ...(ratingsData.book_ratings || []).map((r) => ({ ...r, kind: "book" })),
+    ].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)); // newest first
+
+    const ratedHTML =
+      allRated.length === 0
+        ? `<p style="opacity:0.5; text-align:center; padding: 20px;">
+           You haven't rated anything yet. Start exploring!
+         </p>`
+        : allRated
+            .map((r) => {
+              // Each entry has either .movie or .book depending on kind
+              const item = r.movie || r.book;
+              const sub =
+                r.kind === "movie"
+                  ? item.release_year || ""
+                  : item.authors || "";
+              const stars =
+                "★".repeat(r.user_rating) + "☆".repeat(5 - r.user_rating);
+              const date = new Date(r.updated_at).toLocaleDateString("en-IE", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              });
+              return `
+            <div class="rated-item" style="
+              display: flex; justify-content: space-between; align-items: center;
+              padding: 12px 0; border-bottom: 1px solid #222;">
+              <div>
+                <span style="font-size:0.65rem; text-transform:uppercase; opacity:0.4;
+                  letter-spacing:1px; margin-right:8px;">${r.kind}</span>
+                <span style="font-weight:600;">${item.title}</span>
+                ${sub ? `<span style="font-size:0.75rem; opacity:0.5; margin-left:8px;">${sub}</span>` : ""}
+              </div>
+              <div style="text-align:right; flex-shrink:0; margin-left:16px;">
+                <div style="color:#ffd700; font-size:0.9rem;">${stars}</div>
+                <div style="font-size:0.65rem; opacity:0.4; margin-top:2px;">${date}</div>
+              </div>
+            </div>`;
+            })
+            .join("");
+
+    // Format member-since date nicely
+    const memberSince = new Date(user.member_since).toLocaleDateString(
+      "en-IE",
+      {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      },
+    );
+
+    contentDiv.innerHTML = `
+      <div class="profile-container" style="
+        max-width: 700px; margin: 0 auto; padding: 40px;
+        background: #1b2432; border-radius: 20px; grid-column: 1 / -1;">
+
+        <!-- Avatar + name -->
+        <div style="text-align:center; margin-bottom: 32px;">
+          <div style="position:relative; display:inline-block;">
+            <img src="${currentUser.avatar_url || "https://cdn-icons-png.flaticon.com/512/1144/1144760.png"}"
+              id="profilePageAvatar"
+              style="width:110px; height:110px; border-radius:50%; object-fit:cover;
+                border: 3px solid #a855f7;">
+            <label for="avatarInput" style="
+              position:absolute; bottom:4px; right:4px;
+              background:#a855f7; padding:6px; border-radius:50%; cursor:pointer;
+              font-size:0.8rem;"></label>
+            <input type="file" id="avatarInput" accept="image/*"
+              style="display:none;" onchange="uploadAvatar(event)">
+          </div>
+          <h2 style="margin-top:14px; margin-bottom:4px;">${user.username}</h2>
+          <p style="font-size:0.75rem; opacity:0.4;">Member since ${memberSince}</p>
+        </div>
+
+        <!-- Stats row -->
+        <div style="
+          display: grid; grid-template-columns: repeat(4, 1fr);
+          gap: 12px; margin-bottom: 32px; text-align:center;">
+          ${[
+            ["Total Ratings", statistics.total_ratings],
+            ["Avg Rating", statistics.average_rating.toFixed(1) + " / 5"],
+            ["Movies", statistics.movie_ratings],
+            ["Books", statistics.book_ratings],
+          ]
+            .map(
+              ([label, value]) => `
+            <div style="background:#0f1014; border-radius:12px; padding:16px;">
+              <div style="font-size:1.4rem; font-weight:700; color:#a855f7;">${value}</div>
+              <div style="font-size:0.65rem; opacity:0.5; margin-top:4px; text-transform:uppercase;
+                letter-spacing:1px;">${label}</div>
+            </div>`,
+            )
+            .join("")}
+        </div>
+
+        <!-- Edit form -->
+        <details style="margin-bottom: 28px;">
+          <summary style="cursor:pointer; font-size:0.85rem; opacity:0.6;
+            padding: 8px 0; user-select:none;">Edit account details ▸</summary>
+          <form id="editProfileForm" onsubmit="updateUserData(event)"
+            style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+            <input type="text" id="editUsername" value="${user.username}"
+              placeholder="Username" class="profile-input">
+            <input type="email" id="editEmail" value="${user.email || ""}"
+              placeholder="Email" class="profile-input">
+            <input type="password" id="editPassword" placeholder="New password (leave blank to keep)"
+              class="profile-input">
+            <div style="display:flex; gap:10px;">
+              <button type="submit" class="btn-purple" style="flex:1;">Save Changes</button>
+              <button type="button" class="btn-outline" onclick="switchTab('movies')"
+                style="flex:1;">Cancel</button>
+            </div>
+          </form>
+        </details>
+
+        <!-- Rated items history -->
+        <div>
+          <h3 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;
+            opacity:0.5; margin-bottom:16px;">
+            Rating History (${allRated.length})
+          </h3>
+          ${ratedHTML}
+        </div>
+
+      </div>`;
+  } catch (err) {
+    console.error("Profile load error:", err);
+    contentDiv.innerHTML = `
+      <p style="color:red; grid-column:1/-1; text-align:center;">
+        Could not load profile. Check your connection.
+      </p>`;
+  }
+}
+
+// --- ADMIN DASHBOARD ---
+
+/**
+ * Renders the admin dashboard. Only call this if currentUser.is_admin is true.
+ * Calls:
+ *   GET /api/admin/stats      → aggregate numbers
+ *   GET /api/admin/users      → paginated user list
+ *   GET /api/admin/activity   → recent rating activity
+ */
+async function showAdminDashboard() {
+  window.location.hash = "admin";
+  if (!currentUser || !currentUser.is_admin) {
+    alert("Admin access required.");
+    return;
+  }
+
+  document.getElementById("heroCarousel").style.display = "none";
+  document.getElementById("stats").innerHTML = "";
+
+  const contentDiv = document.getElementById("content");
+  contentDiv.innerHTML = `
+    <div style="grid-column:1/-1; text-align:center; padding:40px;">
+      <div class="loading">Loading admin dashboard...</div>
+    </div>`;
+
+  const token = localStorage.getItem("token");
+
+  try {
+    const [statsRes, usersRes, activityRes] = await Promise.all([
+      fetch(`${API_URL}/admin/stats`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_URL}/admin/users?per_page=20`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_URL}/admin/activity?limit=20`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
+
+    const stats = await statsRes.json();
+    const usersData = await usersRes.json();
+    const activity = await activityRes.json();
+
+    if (!statsRes.ok) {
+      contentDiv.innerHTML = `<p style="color:red; grid-column:1/-1;">Error: ${stats.error}</p>`;
+      return;
+    }
+
+    // ---- Stats cards ----
+    const statCards = [
+      ["Total Users", stats.users.total],
+      ["New This Week", stats.users.new_this_week],
+      ["Banned", stats.users.banned],
+      ["Movies", stats.content.total_movies],
+      ["Books", stats.content.total_books],
+      ["Total Ratings", stats.ratings.total],
+      ["Avg Rating", Number(stats.ratings.average).toFixed(2)],
+      ["Ratings/Week", stats.ratings.new_this_week],
+    ]
+      .map(
+        ([label, value]) => `
+      <div style="background:#1b2432; border-radius:14px; padding:18px; text-align:center;">
+        <div style="font-size:1.5rem; font-weight:700; color:#a855f7;">${value}</div>
+        <div style="font-size:0.65rem; opacity:0.5; margin-top:4px;
+          text-transform:uppercase; letter-spacing:1px;">${label}</div>
+      </div>`,
+      )
+      .join("");
+
+    // ---- User rows ----
+    const userRows = (usersData.users || [])
+      .map(
+        (u) => `
+      <tr id="user-row-${u.id}" style="border-bottom:1px solid #222;">
+        <td style="padding:10px 8px;">${u.username}</td>
+        <td style="padding:10px 8px; font-size:0.75rem; opacity:0.6;">${u.email || "—"}</td>
+        <td style="padding:10px 8px; text-align:center;">${u.rating_count}</td>
+        <td style="padding:10px 8px; text-align:center;">
+          ${
+            u.is_admin
+              ? `<span style="color:#a855f7; font-size:0.7rem;">ADMIN</span>`
+              : `<span style="font-size:0.7rem; opacity:0.4;">user</span>`
+          }
+        </td>
+        <td style="padding:10px 8px; text-align:center;">
+          ${
+            u.is_banned
+              ? `<span style="color:#ef4444; font-size:0.7rem;">BANNED</span>`
+              : `<span style="color:#22c55e; font-size:0.7rem;">active</span>`
+          }
+        </td>
+        <td style="padding:10px 8px; text-align:right;">
+          ${
+            !u.is_admin
+              ? `
+            <button onclick="adminBanUser(${u.id}, ${!u.is_banned})"
+              style="font-size:0.7rem; padding:4px 10px; border-radius:6px; cursor:pointer;
+                background:${u.is_banned ? "#22c55e22" : "#ef444422"};
+                color:${u.is_banned ? "#22c55e" : "#ef4444"};
+                border:1px solid ${u.is_banned ? "#22c55e" : "#ef4444"};">
+              ${u.is_banned ? "Unban" : "Ban"}
+            </button>
+            <button onclick="adminPromoteUser(${u.id}, ${!u.is_admin})"
+              style="font-size:0.7rem; padding:4px 10px; border-radius:6px; cursor:pointer;
+                background:#a855f722; color:#a855f7; border:1px solid #a855f7;
+                margin-left:6px;">
+              ${u.is_admin ? "Demote" : "Promote"}
+            </button>`
+              : "—"
+          }
+        </td>
+      </tr>`,
+      )
+      .join("");
+
+    // ---- Activity rows ----
+    const activityRows =
+      (activity.activities || [])
+        .map((a) => {
+          const time = new Date(a.timestamp).toLocaleString("en-IE", {
+            day: "numeric",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return `
+        <div style="display:flex; justify-content:space-between; align-items:center;
+          padding:10px 0; border-bottom:1px solid #1b2432; font-size:0.8rem;">
+          <div>
+            <span style="color:#a855f7; font-weight:600;">${a.username}</span>
+            <span style="opacity:0.5; margin: 0 6px;">·</span>
+            <span>${a.details}</span>
+          </div>
+          <div style="opacity:0.4; font-size:0.7rem; flex-shrink:0; margin-left:12px;">${time}</div>
+        </div>`;
+        })
+        .join("") ||
+      `<p style="opacity:0.4; text-align:center; padding:20px;">No activity yet.</p>`;
+
+    // ---- Top movies ----
+    const topMoviesHTML = (stats.top_movies || [])
+      .map(
+        (m, i) => `
+      <div style="display:flex; align-items:center; gap:12px; padding:8px 0;
+        border-bottom:1px solid #222; font-size:0.8rem;">
+        <span style="color:#a855f7; font-weight:700; width:20px;">${i + 1}</span>
+        <span style="flex:1;">${m.title}</span>
+        <span style="opacity:0.5;">${m.rating_count} ratings</span>
+        <span style="color:#ffd700;">★ ${Number(m.average_rating).toFixed(1)}</span>
+      </div>`,
+      )
+      .join("");
+
+    contentDiv.innerHTML = `
+      <div style="grid-column:1/-1; max-width:1100px; margin:0 auto; width:100%;">
+
+        <h2 style="margin-bottom:24px; font-size:1.1rem; opacity:0.7;
+          text-transform:uppercase; letter-spacing:2px;">Admin Dashboard</h2>
+
+        <!-- Stat cards -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+          gap:12px; margin-bottom:32px;">
+          ${statCards}
+        </div>
+
+        <!-- Two-column: users + activity -->
+        <div style="display:grid; grid-template-columns:1fr 340px; gap:24px;
+          margin-bottom:32px; align-items:start;">
+
+          <!-- User management table -->
+          <div style="background:#1b2432; border-radius:16px; padding:24px; overflow-x:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center;
+              margin-bottom:16px;">
+              <h3 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;
+                opacity:0.5;">Users (${usersData.total})</h3>
+              <input type="text" placeholder="Search users…"
+                oninput="adminSearchUsers(this.value)"
+                style="background:#0f1014; border:1px solid #333; color:white;
+                  border-radius:8px; padding:6px 12px; font-size:0.8rem; width:160px;">
+            </div>
+            <table id="adminUserTable" style="width:100%; border-collapse:collapse;
+              font-size:0.82rem;">
+              <thead>
+                <tr style="opacity:0.4; font-size:0.65rem; text-transform:uppercase;
+                  letter-spacing:1px;">
+                  <th style="text-align:left; padding:8px;">Username</th>
+                  <th style="text-align:left; padding:8px;">Email</th>
+                  <th style="text-align:center; padding:8px;">Ratings</th>
+                  <th style="text-align:center; padding:8px;">Role</th>
+                  <th style="text-align:center; padding:8px;">Status</th>
+                  <th style="text-align:right; padding:8px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminUserBody">
+                ${userRows}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Activity feed -->
+          <div style="background:#1b2432; border-radius:16px; padding:24px;">
+            <h3 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;
+              opacity:0.5; margin-bottom:16px;">Recent Activity</h3>
+            <div style="max-height:420px; overflow-y:auto;">
+              ${activityRows}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Top movies -->
+        <div style="background:#1b2432; border-radius:16px; padding:24px; margin-bottom:32px;">
+          <h3 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;
+            opacity:0.5; margin-bottom:16px;">Top Rated Movies</h3>
+          ${topMoviesHTML || `<p style="opacity:0.4; text-align:center;">No data yet.</p>`}
+        </div>
+
+      </div>`;
+  } catch (err) {
+    console.error("Admin dashboard error:", err);
+    contentDiv.innerHTML = `
+      <p style="color:red; grid-column:1/-1; text-align:center;">
+        Could not load dashboard. Check your connection.
+      </p>`;
+  }
+}
+
+// --- ADMIN ACTION HELPERS ---
+
+/**
+ * Ban or unban a user. Updates the row in place without a full reload.
+ */
+async function adminBanUser(userId, shouldBan) {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`${API_URL}/admin/users/${userId}/ban`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ banned: shouldBan }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      // Reload dashboard to reflect changes
+      showAdminDashboard();
+    } else {
+      alert("Error: " + data.error);
+    }
+  } catch (err) {
+    console.error("Ban error:", err);
+  }
+}
+
+/**
+ * Promote or demote a user to/from admin.
+ */
+async function adminPromoteUser(userId, makeAdmin) {
+  if (!confirm(`${makeAdmin ? "Promote" : "Demote"} this user?`)) return;
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`${API_URL}/admin/users/${userId}/promote`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ is_admin: makeAdmin }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showAdminDashboard();
+    } else {
+      alert("Error: " + data.error);
+    }
+  } catch (err) {
+    console.error("Promote error:", err);
+  }
+}
+
+/**
+ * Live search within the user table (client-side filter on already-loaded rows).
+ * For a full server-side search, replace with a fetch to /api/admin/users?search=...
+ */
+function adminSearchUsers(query) {
+  const rows = document.querySelectorAll("#adminUserBody tr");
+  const q = query.toLowerCase();
+  rows.forEach((row) => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(q) ? "" : "none";
+  });
+}
+
+// ============================================================
+// ITEM DETAIL — showItemDetail(item, type)
+// Renders a full-screen overlay with poster, description,
+// community rating, user's own rating, and similar items.
+// ============================================================
+
+async function showItemDetail(item, type) {
+  // Update URL hash so reload restores this view
+  history.replaceState(null, "", `#item-${type}-${item.id}`);
+
+  const isBook = type === "books";
+  const token = localStorage.getItem("token");
+
+  // Poster / cover image
+  const poster = isBook
+    ? (item.thumbnail || "")
+        .replace("http://", "https://")
+        .replace("zoom=1", "zoom=0")
+    : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+  const backdrop = isBook
+    ? poster
+    : `https://image.tmdb.org/t/p/original${item.poster_path}`;
+  const placeholder =
+    "https://placehold.jp/24/1b2432/ffffff/500x750.png?text=No+Cover";
+
+  // Fetch the user's existing rating if logged in
+  let userRating = 0;
+  let ratingCount = 0;
+  if (token) {
+    try {
+      const rRes = await fetch(`${API_URL}/ratings/${type}/${item.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (rRes.ok) {
+        const rData = await rRes.json();
+        userRating = rData.your_rating || 0;
+        ratingCount = rData.count || 0;
+      }
+    } catch (e) {
+      /* non-fatal */
+    }
+  }
+
+  // Build star HTML for the detail view
+  function detailStars(current) {
+    return Array.from({ length: 5 }, (_, i) => {
+      const n = i + 1;
+      return `<span
+        class="detail-star"
+        data-val="${n}"
+        onclick="rateFromDetail('${type}', ${item.id}, ${n})"
+        style="font-size:1.8rem; cursor:pointer; color:${n <= current ? "#ffd700" : "#444"};
+          transition: color 0.15s;"
+        onmouseover="highlightStars(${n})"
+        onmouseout="resetStars(${userRating})"
+      >★</span>`;
+    }).join("");
+  }
+
+  const subline = isBook ? item.authors || "" : item.release_year || "";
+
+  // Description — some entries are ALL CAPS from the API, normalise them
+  const rawDesc = item.description || "No description available.";
+  const cleanDesc =
+    rawDesc.length > 0 && rawDesc === rawDesc.toUpperCase()
+      ? rawDesc.charAt(0) + rawDesc.slice(1).toLowerCase()
+      : rawDesc;
+
+  // Inject the overlay into the DOM
+  // We inject into body so it sits above everything
+  const existing = document.getElementById("itemDetailOverlay");
+  if (existing) existing.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "itemDetailOverlay";
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.92);
+    overflow-y: auto;
+    animation: fadeIn 0.2s ease;
+  `;
+
+  overlay.innerHTML = `
+    <style>
+      @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+      @keyframes slideUp { from { transform:translateY(30px); opacity:0 }
+                           to   { transform:translateY(0);    opacity:1 } }
+      #itemDetailOverlay .detail-star:hover { transform: scale(1.2); }
+    </style>
+
+    <!-- Blurred backdrop -->
+    <div style="
+      position:fixed; inset:0; z-index:-1;
+      background-image: url('${backdrop}');
+      background-size: cover; background-position: center;
+      filter: blur(40px) brightness(0.3);
+      transform: scale(1.1);
+    "></div>
+
+    <!-- Close button -->
+    <button onclick="closeItemDetail()"
+      style="position:fixed; top:20px; right:24px; z-index:10;
+        background:rgba(255,255,255,0.08); border:none; color:white;
+        font-size:1.4rem; width:44px; height:44px; border-radius:50%;
+        cursor:pointer; display:flex; align-items:center; justify-content:center;">
+      ✕
+    </button>
+
+    <!-- Main content -->
+    <div style="
+      max-width: 900px; margin: 0 auto; padding: 60px 24px 80px;
+      animation: slideUp 0.3s ease;
+    ">
+      <div style="display:flex; gap:40px; align-items:flex-start;
+        flex-wrap:wrap;">
+
+        <!-- Poster -->
+        <div style="flex-shrink:0;">
+          <img src="${poster}" alt="${item.title}"
+            onerror="this.src='${placeholder}'"
+            style="width:220px; border-radius:16px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.6);">
+        </div>
+
+        <!-- Info -->
+        <div style="flex:1; min-width:260px;">
+          <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:2px;
+            opacity:0.4; margin-bottom:8px;">${type.slice(0, -1)}</div>
+
+          <h1 style="font-size:2rem; font-weight:800; margin:0 0 8px; line-height:1.2;">
+            ${item.title}
+          </h1>
+
+          ${subline ? `<p style="opacity:0.5; margin:0 0 20px; font-size:0.9rem;">${subline}</p>` : ""}
+
+          <!-- Community rating -->
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:28px;">
+            <div style="font-size:2.5rem; font-weight:800; color:#ffd700; line-height:1;">
+              ${item.rating ? Number(item.rating).toFixed(1) : "—"}
+            </div>
+            <div>
+              <div style="color:#ffd700; font-size:1rem;">★★★★★</div>
+              <div style="font-size:0.7rem; opacity:0.4; margin-top:2px;">
+                Community rating
+              </div>
+            </div>
+          </div>
+
+          <!-- User rating -->
+          <div style="margin-bottom:28px;">
+            <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;
+              opacity:0.5; margin-bottom:8px;">Your Rating</div>
+            ${
+              token
+                ? `<div id="detailStarsContainer">${detailStars(userRating)}</div>
+                 <div id="detailRatingLabel" style="font-size:0.75rem; opacity:0.5;
+                   margin-top:6px; height:18px;">
+                   ${userRating ? `You rated this ${userRating}/5` : "Click to rate"}
+                 </div>`
+                : `<p style="opacity:0.4; font-size:0.85rem;">
+                   <a onclick="showLoginModal()"
+                     style="color:#a855f7; cursor:pointer;">Login</a> to rate this
+                 </p>`
+            }
+          </div>
+
+          <!-- Description -->
+          <div style="font-size:0.9rem; line-height:1.7; opacity:0.75; max-width:520px;">
+            ${cleanDesc}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Close on backdrop click (but not on content click)
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeItemDetail();
+  });
+
+  // Close on Escape key
+  const escHandler = (e) => {
+    if (e.key === "Escape") {
+      closeItemDetail();
+      document.removeEventListener("keydown", escHandler);
+    }
+  };
+  document.addEventListener("keydown", escHandler);
+}
+
+function closeItemDetail() {
+  const overlay = document.getElementById("itemDetailOverlay");
+  if (overlay) overlay.remove();
+  // Restore the tab hash
+  history.replaceState(null, "", "#" + currentTab);
+}
+
+// Star hover helpers (called from inline onmouseover/onmouseout)
+function highlightStars(n) {
+  document.querySelectorAll(".detail-star").forEach((s, i) => {
+    s.style.color = i < n ? "#ffd700" : "#444";
+  });
+}
+
+function resetStars(current) {
+  document.querySelectorAll(".detail-star").forEach((s, i) => {
+    s.style.color = i < current ? "#ffd700" : "#444";
+  });
+}
+
+// Rating from inside the detail overlay
+async function rateFromDetail(type, id, val) {
+  await rateItem(type, id, val); // reuse existing rateItem function
+
+  // Update the stars and label in place
+  const container = document.getElementById("detailStarsContainer");
+  const label = document.getElementById("detailRatingLabel");
+
+  if (container) {
+    // Re-render stars with new value
+    container.querySelectorAll(".detail-star").forEach((s, i) => {
+      s.style.color = i < val ? "#ffd700" : "#444";
+      // Update onclick to reflect new current value for hover reset
+      s.setAttribute("onmouseout", `resetStars(${val})`);
+    });
+  }
+  if (label) label.textContent = `You rated this ${val}/5`;
 }
