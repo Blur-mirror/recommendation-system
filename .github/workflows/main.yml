@@ -44,14 +44,14 @@ jobs:
           touch .env
           # DB (used by postgres container)
           echo "POSTGRES_USER=postgres" >> .env
-          echo "POSTGRES_PASSWORD=pass" >> .env
+          echo "POSTGRES_PASSWORD=postgres" >> .env
           echo "POSTGRES_DB=recommender" >> .env
 
           # Backend (must MATCH DB)
-          echo "DB_PASS=pass" >> .env
+          echo "DB_PASS=postgres" >> .env
 
           # App config
-          echo "DATABASE_URL=postgresql://postgres:pass@db:5432/recommender" >> .env
+          echo "DATABASE_URL=postgresql://postgres:postgres@db:5432/recommender" >> .env
           echo "JWT_SECRET_KEY=dummy_key" >> .env
           echo "TMDB_API_KEY=dummy_key" >> .env
           echo "GOOGLE_BOOKS_KEY=dummy_key" >> .env
