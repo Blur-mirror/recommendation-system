@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LitFlick | Movies</title>
+    <title>LitFlick | Books</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -19,7 +19,7 @@
           <input
             type="text"
             id="searchInput"
-            placeholder="Search movies, books..."
+            placeholder="Search books..."
             onkeyup="handleSearch()"
           />
           <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()"
@@ -30,8 +30,8 @@
       <div class="header-right">
         <nav class="nav-links">
           <a href="recommendations.html" class="nav-item">For You</a>
-          <a href="index.html" class="nav-item active">Movies</a>
-          <a href="books.html" class="nav-item">Books</a>
+          <a href="index.html" class="nav-item">Movies</a>
+          <a href="books.html" class="nav-item active">Books</a>
           <a
             href="admin.html"
             class="nav-item"
@@ -82,22 +82,8 @@
         style="margin-bottom: 20px; opacity: 0.6; font-size: 0.9rem"
       ></div>
       <div class="grid" id="content">
-        <div class="loading">Loading movies...</div>
+        <div class="loading">Loading books...</div>
       </div>
-    </div>
-    <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </header>
-
-  <div class="container">
-    <div class="hero-carousel" id="heroCarousel">
-      <button class="carousel-btn prev" onclick="moveCarousel(-1)">&#10094;</button>
-      <div class="carousel-container" id="carouselContainer"></div>
-      <button class="carousel-btn next" onclick="moveCarousel(1)">&#10095;</button>
-      <div class="carousel-dots" id="carouselDots"></div>
     </div>
 
     <footer class="site-footer">
@@ -149,7 +135,6 @@
       </div>
     </footer>
 
-    <!-- Modals -->
     <div class="modal" id="loginModal">
       <div class="modal-content" style="position: relative">
         <span
@@ -218,27 +203,18 @@
             Logout
           </button>
         </div>
-        <input type="text" id="authUsername" placeholder="Username" required
-          style="width:100%; padding:10px; margin-bottom:15px; background:#0f1014; border:1px solid #333; color:white; border-radius:5px;">
-        <input type="password" id="authPassword" placeholder="Password" required
-          style="width:100%; padding:10px; margin-bottom:15px; background:#0f1014; border:1px solid #333; color:white; border-radius:5px;">
-        <button type="submit" class="btn-purple" style="width: 100%; padding: 12px;">Continue</button>
-      </form>
-      <p style="text-align:center; margin-top:15px; font-size:0.8rem;">
-        <a onclick="toggleAuthMode()" style="color:#a855f7; cursor:pointer;">Switch Login/Register</a>
-      </p>
+      </div>
     </div>
 
     <script src="script.js"></script>
     <script>
-      // Page-specific init
       window.onload = async () => {
         const searchInput = document.getElementById("searchInput");
         const clearBtn = document.getElementById("clearSearch");
         if (searchInput) searchInput.value = "";
         if (clearBtn) clearBtn.style.display = "none";
         await checkAuth();
-        loadData("movies");
+        loadData("books");
       };
     </script>
   </body>
