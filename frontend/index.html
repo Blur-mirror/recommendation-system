@@ -13,18 +13,25 @@
     <div class="header-left">
       <a href="#" class="logo-link">
         <img src="favicon/icono.png" alt="LitFlick Logo" class="logo-img">
-      <h1 class="logo">LitFlick</h1>
+        <h1 class="logo">LitFlick</h1>
       </a>
     </div>
 
     <div class="header-center">
-    <div class="search-container">
+      <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search movies, books..." onkeyup="handleSearch()">
         <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()">&times;</span>
+      </div>
+    </div>
+
+    <div class="header-right" id="navDrawer">
+
+      <div class="mobile-only-search">
+    <div class="search-container">
+        <input type="text" id="searchInputMobile" placeholder="Search..." onkeyup="handleSearch(true)">
+        <span id="clearSearchMobile" class="clear-btn" onclick="clearSearchInput(true)">&times;</span>
     </div>
 </div>
-
-    <div class="header-right">
       <nav class="nav-links">
         <a href="#" class="nav-item" onclick="switchTab('recommendations')">For You</a>
         <a href="#" class="nav-item" onclick="switchTab('movies')">Movies</a>
@@ -39,6 +46,11 @@
         <button class="btn-purple" id="registerBtn" onclick="showRegisterModal()">Register</button>
         <button class="btn-outline" id="logoutBtn" onclick="logout()" style="display: none">Logout</button>
       </div>
+    </div>
+    <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
     </div>
   </header>
 
@@ -85,11 +97,11 @@
 
       <div class="footer-col">
         <div class="header-left">
-      <a href="#" class="logo-link">
-        <img src="favicon/icono.png" alt="LitFlick Logo" class="logo-img">
-      <h1 class="logo">LitFlick</h1>
-      </a>
-      </div>
+          <a href="#" class="logo-link">
+            <img src="favicon/icono.png" alt="LitFlick Logo" class="logo-img">
+            <h1 class="logo">LitFlick</h1>
+          </a>
+        </div>
         <p class="footer-desc">
           Your ultimate destination to discover, rate, and organize the best stories, whether on the big
           screen or on paper.
@@ -141,15 +153,15 @@
 
   <div id="logoutModal" class="modal">
     <div class="modal-content logout-modal-box">
-        <div class="modal-icon">⚠️</div>
-        <h2>Sign Out</h2>
-        <p>Are you sure you want to log out of LitFlick?</p>
-        <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
-            <button class="btn-confirm-logout" onclick="confirmLogout()">Logout</button>
-        </div>
+      <div class="modal-icon">⚠️</div>
+      <h2>Sign Out</h2>
+      <p>Are you sure you want to log out of LitFlick?</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+        <button class="btn-confirm-logout" onclick="confirmLogout()">Logout</button>
+      </div>
     </div>
-</div>
+  </div>
 
 </body>
 

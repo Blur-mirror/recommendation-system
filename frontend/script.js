@@ -479,31 +479,58 @@ async function rateItem(type, id, val) {
 }
 
 /**
- * Filters the current grid data based on search input.
+ * Unified search function for Desktop and Mobile.
+ * @param {boolean} isMobile - Set to true when calling from the hamburger menu.
  */
-function handleSearch() {
-    const input = document.getElementById("searchInput");
-    const clearBtn = document.getElementById("clearSearch");
+function handleSearch(isMobile = false) {
+    // 1. Identify which input to read from
+    const inputId = isMobile ? "searchInputMobile" : "searchInput";
+    const input = document.getElementById(inputId);
+    
+    // 2. Safety check: if input doesn't exist, stop
+    if (!input) return;
+
     const q = input.value.toLowerCase();
 
-    // Show button only if there is text
+    // 3. Handle the "X" (clear) button visibility
+    const clearBtnId = isMobile ? "clearSearchMobile" : "clearSearch";
+    const clearBtn = document.getElementById(clearBtnId);
     if (clearBtn) {
         clearBtn.style.display = q.length > 0 ? "block" : "none";
     }
 
-    const filtered = allData.filter(d => d.title.toLowerCase().includes(q) && isValidURL(d));
+    /** * 4. FILTERING LOGIC
+     * We removed "isValidURL(d)" because it was causing a ReferenceError.
+     * We only filter by title.
+     */
+    const filtered = allData.filter(item => {
+        const titleMatch = item.title && item.title.toLowerCase().includes(q);
+        return titleMatch;
+    });
+
+    // 5. Update the UI with filtered results
     renderGrid(filtered, currentTab);
 }
 
-function clearSearchInput() {
-    const input = document.getElementById("searchInput");
-    const clearBtn = document.getElementById("clearSearch");
+/**
+ * Unified clear search function.
+ */
+function clearSearchInput(isMobile = false) {
+    const inputId = isMobile ? "searchInputMobile" : "searchInput";
+    const input = document.getElementById(inputId);
+    
+    if (input) {
+        input.value = "";
+        
+        // Hide clear button
+        const clearBtnId = isMobile ? "clearSearchMobile" : "clearSearch";
+        const clearBtn = document.getElementById(clearBtnId);
+        if (clearBtn) clearBtn.style.display = "none";
+    }
 
-    input.value = "";
-    if (clearBtn) clearBtn.style.display = "none"; // Hide button after clear
-
+    // Reset grid to show all data
     renderGrid(allData, currentTab);
-    input.focus();
+    if (input) input.focus();
 }
 
 // --- 8. UI HELPERS & MODALS ---
@@ -653,3 +680,44 @@ async function updateUserData(e) {
         switchTab('movies');
     }
 }
+
+
+/**
+ * Toggles the mobile navigation menu.
+ */
+function toggleMobileMenu() {
+    const nav = document.querySelector(".header-right");
+    const hamburger = document.getElementById("hamburger");
+    
+    nav.classList.toggle("active");
+    hamburger.classList.toggle("open");
+}
+
+/**
+ * Enhanced switchTab to also close the mobile menu
+ */
+const originalSwitchTab = switchTab; // Save original
+switchTab = function(tab) {
+    originalSwitchTab(tab);
+    
+    // Close mobile menu if open
+    const nav = document.querySelector(".header-right");
+    const hamburger = document.getElementById("hamburger");
+    if (nav.classList.contains("active")) {
+        toggleMobileMenu();
+    }
+}
+
+/**
+ * Close menu when clicking outside
+ */
+document.addEventListener('click', (e) => {
+    const nav = document.querySelector(".header-right");
+    const hamburger = document.getElementById("hamburger");
+    
+    if (nav.classList.contains("active") && 
+        !nav.contains(e.target) && 
+        !hamburger.contains(e.target)) {
+        toggleMobileMenu();
+    }
+});

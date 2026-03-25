@@ -757,3 +757,177 @@ To align icon and text horizontally */
     background: linear-gradient(135deg, #b76eff 0%, #8b5cf6 100%);
 }
 
+/* --- RESPONSIVE DESIGN --- */
+
+/* Hamburger Icon */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    z-index: 1001;
+    padding: 10px;
+}
+
+.hamburger span {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+/* Tablet & Mobile (992px and down) */
+@media (max-width: 1070px) {
+    .hamburger {
+        display: flex;
+    }
+
+    .header-center {
+        flex: 0 1 200px; /* Shorter search bar */
+    }
+
+    .header-right {
+        position: fixed;
+        top: 0;
+        right: -280px; /* Hidden by default */
+        width: 280px;
+        height: 100vh;
+        background: #1b2432;
+        flex-direction: column;
+        justify-content: flex-start;
+        
+        
+        gap: 40px;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        z-index: 1000;
+
+
+        
+        align-items: center;      /* Centers items horizontally */
+        text-align: center;       /* Centers text inside items */
+        padding: 80px 30px 40px;  /* Adjust padding if needed */
+    
+    }
+
+    .header-right.active {
+        right: 0;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 25px;
+        width: 100%;
+    }
+
+    .nav-item {
+        font-size: 1.2rem;
+        display: block;
+        width: 100%;
+    }
+
+    .auth-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;    /* Centers the buttons and user-info block */
+        width: 100%;
+        gap: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 25px;
+        margin-top: 10px;
+    }
+
+    #userInfo {
+        margin-bottom: 20px;
+    }
+
+    /* Animation for Hamburger to X */
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
+
+    /* Hero Carousel adjustment */
+    .hero-carousel { height: 300px; }
+    .slide-content h2 { font-size: 1.8rem; }
+    .slide-content { padding: 0 30px; }
+}
+
+/* Phones (600px and down) */
+@media (max-width: 600px) {
+    .main-header { padding: 10px 20px; }    
+    .logo { font-size: 1.4rem; }
+    .logo-img { height: 30px; }
+
+    .header-right {
+        justify-content: flex-start;
+        align-items: center;      /* Centers items horizontally */
+        text-align: center;       /* Centers text inside items */
+        flex-direction: column;
+        padding: 80px 25px 40px;  /* Adjust padding if needed */
+        gap: 10px;
+    }
+
+    .nav-links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;      /* Centers links horizontally */        
+        width: 100%;
+        gap: 15px;
+    }
+
+    .nav-item {
+        width: 100%;
+        font-size: 1.2rem;
+    }
+
+    .header-center { display: none; } /* Hide search or move it to menu */
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 items per row on mobile */
+        gap: 15px;
+    }
+
+    .hero-carousel { height: 250px; }
+    .slide-desc { display: none !important; } /* Hide desc on very small screens */
+
+    .auth-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 20px;
+        margin-top: 10px; /* Separates the logout section from the links */
+    }
+}
+
+
+/* By default, the menu search bar is hidden. */
+.mobile-only-search {
+    display: none;
+}
+
+/* When the screen is smaller than 600px */
+@media (max-width: 600px) {
+    /* 1. We hide the search bar that's in the center of the header */
+    header > .header-center {
+        display: none !important;
+    }
+
+    /* 2. We show the search bar that is inside the hamburger menu. */
+    .mobile-only-search {
+        display: block;
+        width: 100%;
+        margin-bottom: 5px; /* Space before 'For You' */
+    }
+
+    .mobile-only-search .search-container {
+        width: 100%;
+        background: #0f1014;        
+    }
+}
+
+
+
