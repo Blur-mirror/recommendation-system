@@ -16,6 +16,7 @@ from flask_cors import CORS
 from db import get_connection
 from routes.profile import profile_bp
 from routes.admin import admin_bp
+import os
 
 
 app = Flask(__name__)
@@ -107,7 +108,7 @@ def init_db_extras():
         # If something goes wrong (e.g., table 'users' doesn't exist), log it
         print(f"ℹ️ Info DB: {e}")
 
-if __name__ == '__main__':
-    init_db_extras()
+init_db_extras()
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=os.environ.get('FLASK_DEBUG', 'false').lower() == 'true')

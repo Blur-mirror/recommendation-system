@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: litflick-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: litflick-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+      - key: GOOGLE_BOOKS_KEY
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+
+  - type: web
+    name: litflick-frontend
+    runtime: static
+    staticPublishPath: ./frontend
+    buildCommand: ""
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+
+databases:
+  - name: litflick-db
+    databaseName: recommender
+    plan: free
