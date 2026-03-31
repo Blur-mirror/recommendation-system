@@ -3,6 +3,7 @@ services:
     name: litflick-backend
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -17,10 +18,11 @@ services:
       - key: WEBHOOK_SECRET
         sync: false
 
-  - type: static
+  - type: web # Yes, 'web' is correct for static sites too
     name: litflick-frontend
+    runtime: static # This is the "magic" keyword that tells Render it's a static site
     publishPath: ./frontend
-    buildCommand: "" # This is mandatory even if empty
+    buildCommand: "" # Docs say this is required for non-Docker services
     headers:
       - path: /*
         name: Cache-Control
