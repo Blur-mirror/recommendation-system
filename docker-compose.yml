@@ -30,6 +30,10 @@ services:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      TMDB_API_KEY: ${TMDB_API_KEY}
+      GOOGLE_BOOKS_KEY: ${GOOGLE_BOOKS_KEY}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+
     ports:
       - "5000:5000" #enables the port so we can use flask on it and get results from the requests.
     networks:
