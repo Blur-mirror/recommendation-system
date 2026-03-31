@@ -24,7 +24,6 @@ services:
     #This is the backend (FLASK)
     build: ./backend #this looks for the Dockerfile with instructions for the build
     container_name: recommender_backend
-    env_file: .env #added .env instructions as movies were not being fetched successfully
     environment:
       DB_HOST: db
       DB_NAME: ${DB_NAME}
