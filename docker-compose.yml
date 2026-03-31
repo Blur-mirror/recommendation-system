@@ -9,9 +9,9 @@ services:
       retries: 5
     container_name: recommender_db
     environment:
-      POSTGRES_DB: recommender
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -24,13 +24,12 @@ services:
     #This is the backend (FLASK)
     build: ./backend #this looks for the Dockerfile with instructions for the build
     container_name: recommender_backend
-    env_file: .env #added .env instructions as movies were not being fetched successfully
     environment:
       DB_HOST: db
-      DB_NAME: recommender
-      DB_USER: postgres
-      DB_PASS: postgres
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY} #include the JWT secret for user auth
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     ports:
       - "5000:5000" #enables the port so we can use flask on it and get results from the requests.
     networks:

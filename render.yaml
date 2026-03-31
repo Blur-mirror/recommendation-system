@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: litflick-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    startCommand: python init_db.py && gunicorn -w 2 -b 0.0.0.0:5000 app:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: litflick-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+      - key: GOOGLE_BOOKS_KEY
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+
+  - type: static
+    name: litflick-frontend
+    staticPublishPath: ./frontend
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+
+databases:
+  - name: litflick-db
+    databaseName: recommender
+    plan: free
