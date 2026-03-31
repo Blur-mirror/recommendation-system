@@ -2,8 +2,10 @@ services:
   - type: web
     name: litflick-backend
     runtime: docker
+    # Dockerfile is inside the backend folder
     dockerfilePath: ./backend/Dockerfile
-    startCommand: python init_db.py && gunicorn -w 2 -b 0.0.0.0:5000 app:app
+    # Ensure your context is set correctly if needed
+    dockerContext: ./backend
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -18,9 +20,9 @@ services:
       - key: WEBHOOK_SECRET
         sync: false
 
-  - type: static
+  - type: static_site
     name: litflick-frontend
-    staticPublishPath: ./frontend
+    publishPath: ./frontend
     headers:
       - path: /*
         name: Cache-Control
