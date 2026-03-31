@@ -2,10 +2,7 @@ services:
   - type: web
     name: litflick-backend
     runtime: docker
-    # Dockerfile is inside the backend folder
     dockerfilePath: ./backend/Dockerfile
-    # Ensure your context is set correctly if needed
-    dockerContext: ./backend
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -20,9 +17,10 @@ services:
       - key: WEBHOOK_SECRET
         sync: false
 
-  - type: static_site
+  - type: static
     name: litflick-frontend
     publishPath: ./frontend
+    buildCommand: "" # This is mandatory even if empty
     headers:
       - path: /*
         name: Cache-Control
