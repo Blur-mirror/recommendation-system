@@ -18,11 +18,11 @@ services:
       - key: WEBHOOK_SECRET
         sync: false
 
-  - type: web # Yes, 'web' is correct for static sites too
+  - type: web
     name: litflick-frontend
-    runtime: static # This is the "magic" keyword that tells Render it's a static site
-    publishPath: ./frontend
-    buildCommand: "" # Docs say this is required for non-Docker services
+    runtime: static
+    staticPublishPath: ./frontend
+    buildCommand: ""
     headers:
       - path: /*
         name: Cache-Control
