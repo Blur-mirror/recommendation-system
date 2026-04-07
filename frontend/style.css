@@ -605,10 +605,10 @@ a {
 
 /* --- FOOTER --- */
 .site-footer {
-  background: var(--bg-secondary);
+  background: var(--bg-main); /* Matches the body background color */
   padding: 56px 0 20px;
   margin-top: 60px;
-  border-top: 1px solid #2a2a3a;
+  border-top: 1px solid #2a2a3a; /* Subtle line to separate from main content */
   font-size: 0.88rem;
 }
 
@@ -716,3 +716,184 @@ a {
 }
 
 .hidden { display: none; }
+
+/* ============================================================
+  RESPONSIVE DESIGN & HAMBURGER MENU
+   ============================================================ */
+
+/* --- HAMBURGER BUTTON --- */
+.hamburger-btn {
+  display: none;
+  background: transparent; 
+  border: none;            
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 1000;
+  padding: 5px;
+  margin-left: auto;
+}
+
+/* --- TABLETS (< 1070px) --- */
+@media (max-width: 1070px) {
+  
+  .main-header {
+    padding: 0 20px;
+  }
+
+  .hamburger-btn {
+    display: block;
+  }
+
+  .header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40vw; 
+    max-width: 320px; 
+    min-width: 200px; 
+    margin: 0;
+  }
+
+  /* 1. Menu container styling */
+  .header-right {
+    position: fixed;
+    top: var(--nav-height);
+    right: -100%;
+    width: 280px; /* Slightly wider to give items breathing room */
+    height: calc(100vh - var(--nav-height));
+    background: var(--bg-elevated);
+    flex-direction: column;
+    align-items: stretch; /* Stretch all items to full width */
+    padding: 20px;
+    border-left: 1px solid var(--border);
+    box-shadow: -5px 0 25px rgba(0,0,0,0.4); /* Shadow to give it depth */
+    transition: right 0.3s ease-in-out;
+    z-index: 999;
+  }
+
+  /* 2. Navigation Links styling */
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 8px; 
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border); 
+  }
+
+  .nav-item {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 1.05rem;
+    font-weight: 500;
+    text-align: center; 
+  }
+
+  .nav-item:hover, 
+  .nav-item.active {
+    background: rgba(168,85,247,0.1); 
+    color: var(--accent);
+  }
+
+  /* 3. Auth and User styling */
+  .auth-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 15px;
+  }
+
+  #userInfo {
+    padding: 12px 16px;
+    background: var(--bg-main);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: center; /* Centers the inner content */
+    align-items: center;
+  }
+
+  /* Groups the avatar and text together in the dead center */
+  #userInfo .user-profile-link {
+    width: 100%;
+    display: flex !important;
+    justify-content: center !important; 
+    align-items: center;
+    gap: 10px !important; /* Space between the avatar and username */
+  }
+
+  #userInfo .nav-avatar {
+    position: static; /* Removes any absolute positioning */
+    margin: 0;
+  }
+
+  /* Removes the invisible box trick from before */
+  #userInfo .user-profile-link::after {
+    display: none;
+  }
+
+  .auth-buttons button {
+    width: 100%;
+    padding: 12px; 
+  }
+
+  .main-header.menu-open .header-right {
+    right: 0;
+  }
+  
+  .hero-carousel { height: 320px; }
+  .slide-content { padding: 0 40px; }
+}
+
+/* --- SMARTPHONES (< 600px) --- */
+@media (max-width: 600px) {
+  
+  /* 1. Hide the logo text ONLY in the header (top bar) */
+  .main-header .logo {
+    display: none; 
+  }
+
+  /* 2. Centered and flexible search bar */
+  .header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50vw; 
+    min-width: 160px; 
+  }
+
+  /* 3. Menu internal padding adjustment */
+  .header-right {
+    padding-top: 40px; 
+  }
+  
+  /* 4. General Layout and Grid adjustments */
+  .hero-carousel { height: 260px; margin: 10px 0 20px; }
+  .slide-content { padding: 0 20px; }
+  .slide-content h2 { font-size: 1.6rem; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+  .card { min-height: auto; }
+  .card-content h3 { font-size: 0.85rem; }
+  .modal-content { padding: 24px 20px; }
+  
+  /* 5. Footer adjustments to center ABSOLUTELY everything */
+  .footer-container { 
+    flex-direction: column; 
+    gap: 32px; 
+    text-align: center; 
+  }
+  
+  .footer-col .logo-link { 
+    justify-content: center; /* Centers the icon and logo text together */
+  }
+  
+  .footer-desc { 
+    margin: 14px auto 20px; /* Centers the description paragraph */
+  }
+  
+  .social-icons { 
+    justify-content: center; /* Centers the social media links */
+  }
+}

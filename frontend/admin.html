@@ -9,17 +9,18 @@
   <body>
     <header class="main-header">
       <div class="header-left">
-        <a href="index.html" class="logo-link"
-          ><img src="favicon/icono.png" alt="LitFlick" class="logo-img" />
-          <h1 class="logo">LitFlick</h1></a
-        >
+        <a href="index.html" class="logo-link">
+          <img src="favicon/icono.png" alt="LitFlick" class="logo-img" />
+          <h1 class="logo">LitFlick</h1>
+        </a>
       </div>
+      
       <div class="header-center">
         <div class="search-container">
           <input
             type="text"
             id="searchInput"
-            placeholder="Search..."
+            placeholder="Search movies, books..."
             onkeyup="handleSearch()"
           />
           <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()"
@@ -27,6 +28,7 @@
           >
         </div>
       </div>
+      
       <div class="header-right">
         <nav class="nav-links">
           <a href="recommendations.html" class="nav-item">For You</a>
@@ -34,9 +36,9 @@
           <a href="books.html" class="nav-item">Books</a>
           <a
             href="admin.html"
-            class="nav-item active"
+            class="nav-item"
             id="adminNavLink"
-            style="color: #a855f7"
+            style="display: none; color: #a855f7"
             >Admin</a
           >
         </nav>
@@ -64,6 +66,10 @@
           </button>
         </div>
       </div>
+
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
+        &#9776;
+      </button>
     </header>
 
     <div class="container">

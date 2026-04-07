@@ -1416,3 +1416,10 @@ async function openRatedItem(r) {
 
   showItemDetail(fullItem, type);
 }
+
+// Function to toggle the hamburger menu
+function toggleMenu() {
+  const header = document.querySelector('.main-header');
+  // This toggles the 'menu-open' class on and off
+  header.classList.toggle('menu-open');
+}
