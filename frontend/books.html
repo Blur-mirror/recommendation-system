@@ -14,12 +14,13 @@
           <h1 class="logo">LitFlick</h1>
         </a>
       </div>
+      
       <div class="header-center">
         <div class="search-container">
           <input
             type="text"
             id="searchInput"
-            placeholder="Search books..."
+            placeholder="Search movies, books..."
             onkeyup="handleSearch()"
           />
           <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()"
@@ -27,11 +28,12 @@
           >
         </div>
       </div>
+      
       <div class="header-right">
         <nav class="nav-links">
           <a href="recommendations.html" class="nav-item">For You</a>
           <a href="index.html" class="nav-item">Movies</a>
-          <a href="books.html" class="nav-item active">Books</a>
+          <a href="books.html" class="nav-item">Books</a>
           <a
             href="admin.html"
             class="nav-item"
@@ -64,6 +66,10 @@
           </button>
         </div>
       </div>
+
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
+        &#9776;
+      </button>
     </header>
 
     <div class="container">
