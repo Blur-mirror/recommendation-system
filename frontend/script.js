@@ -1416,3 +1416,19 @@ async function openRatedItem(r) {
 
   showItemDetail(fullItem, type);
 }
+
+function toggleMenu() {
+    const nav = document.getElementById('headerRight');
+    const burger = document.getElementById('hamburger');
+    
+    nav.classList.toggle('active');
+    burger.classList.toggle('open');
+}
+
+
+document.querySelectorAll('.nav-item').forEach(link => {
+    link.addEventListener('click', () => {
+        document.getElementById('headerRight').classList.remove('active');
+        document.getElementById('hamburger').classList.remove('open');
+    });
+});
